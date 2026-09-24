@@ -1,1972 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Kola Bro — Reply to Students</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #FFFFFF;      /* white — primary accent: buttons, headings, icons, active states */
-            --primary-dim: rgba(255,255,255,0.14);
-            --secondary: #FFFFFF;    /* white — highlights */
-            --secondary-dim: rgba(255,255,255,0.14);
-            --accent: #FFFFFF;       /* kept as alias so existing references still resolve */
-            --gold: #FFFFFF;
-            --glow: rgba(255,255,255,0.18);
-            --bg: #000000;           /* pure black page background */
-            --surface: #0A0A0A;      /* near-black card/panel surface */
-            --surface-2: #1A1A1A;    /* active / selected elements */
-            --card-bg: rgba(10,10,10,0.82);
-            --border: #333333;       /* subtle gray borders */
-            --border-dim: rgba(51,51,51,0.6);
-            --text: #FFFFFF;         /* primary text */
-            --text-muted: #CCCCCC;   /* secondary / muted text */
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: #000000;
-            color: #FFFFFF;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* ── GLOBAL PALETTE ENFORCEMENT — keeps every page/view on the same
-           black + white theme, including raw Tailwind utility classes
-           that aren't wired to the CSS variables above. ── */
-        html { background: #000000; }
-        .text-gray-300, .text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700 {
-            color: #CCCCCC !important;
-        }
-        .bg-white\/5, .bg-white\/10, .border-white\/5, .border-white\/10 {
-            border-color: #333333 !important;
-        }
-
-        /* ── THREE.JS CANVAS — disabled per request (flat background only) ── */
-        #three-canvas {
-            display: none !important;
-        }
-        #three-canvas-old-rules-unused {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* All content above the canvas */
-        header, .container, #pdf-viewer-overlay, #hamburger-menu, #menu-overlay,
-        footer, #tool-modal, #notif-popup, #settings-modal { position: relative; z-index: 1; }
-
-        /* ── GLASS UI ── */
-        .glass-ui {
-            background: var(--card-bg);
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-        }
-
-        .glass-login {
-            background: rgba(10,10,10,0.85);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            border: 1px solid var(--border);
-            border-radius: 28px;
-            box-shadow: 0 0 80px rgba(255,255,255,0.06), inset 0 0 40px rgba(255,255,255,0.02);
-        }
-
-        /* ── TYPOGRAPHY ── */
-        .premium-text {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .orbitron { font-family: 'Orbitron', monospace; }
-
-        /* ── BUTTONS ── */
-        .btn-action {
-            background: linear-gradient(135deg, var(--primary), #CCCCCC);
-            color: #000000;
-            font-weight: 800;
-            transition: 0.3s cubic-bezier(0.4,0,0.2,1);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(255,255,255,0.3);
-        }
-        .btn-action::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.2) 100%);
-            opacity: 0;
-            transition: 0.3s;
-        }
-        .btn-action:hover::after { opacity: 1; }
-        .btn-action:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 16px 40px rgba(255,255,255,0.4); }
-
-        .btn-blue {
-            background: linear-gradient(135deg, var(--secondary), #CCCCCC);
-            color: #000000;
-            font-weight: 800;
-            transition: 0.3s;
-        }
-        .btn-blue:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(255,255,255,0.35); }
-
-        /* ── CARD HOVER ── */
-        .card-hover {
-            transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
-            cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.08);
-            transform-style: preserve-3d;
-            background: var(--card-bg);
-        }
-        .card-hover:hover {
-            border-color: var(--primary);
-            background: var(--primary-dim);
-            transform: translateY(-6px) scale(1.03);
-            box-shadow: 0 20px 60px rgba(255,255,255,0.12), 0 0 0 1px rgba(255,255,255,0.15);
-        }
-
-        /* ── VIEW STEPS ── */
-        .view-step { display: none; animation: fadeSlideIn 0.5s ease-out; }
-        .view-active { display: block; }
-        @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ── PDF VIEWER ── */
-        /* #pdf-viewer-overlay styling now lives inline next to its HTML (search "pdfv-topbar") for easier editing */
-
-        /* ══════════════════════════════════════════
-           GALLERY — SIMPLE SYSTEM (imgbb-backed)
-        ══════════════════════════════════════════ */
-        #gallery-masonry {
-            columns: 2; column-gap: 10px;
-        }
-        @media(min-width:640px){ #gallery-masonry{ columns:3; } }
-        @media(min-width:1024px){ #gallery-masonry{ columns:4; } }
-
-        .g-card {
-            break-inside: avoid;
-            margin-bottom: 10px;
-            border-radius: 18px;
-            overflow: hidden;
-            position: relative;
-            cursor: pointer;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            transition: transform .3s cubic-bezier(.4,0,.2,1), box-shadow .3s, border-color .3s;
-        }
-        .g-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 16px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.2);
-            border-color: rgba(255,255,255,.3);
-        }
-        .g-card img { width:100%; display:block; }
-        .g-fav-badge {
-            position:absolute; top:8px; right:8px; width:26px; height:26px; border-radius:50%;
-            background:rgba(0,0,0,.55); backdrop-filter:blur(4px);
-            display:flex; align-items:center; justify-content:center; color:#CCCCCC; font-size:12px;
-            border:1px solid rgba(255,255,255,.3);
-        }
-        .g-hide-badge {
-            position:absolute; top:8px; left:8px; width:26px; height:26px; border-radius:50%;
-            background:rgba(0,0,0,.55); backdrop-filter:blur(4px);
-            display:flex; align-items:center; justify-content:center; color:var(--primary); font-size:11px;
-            border:1px solid rgba(255,255,255,.3);
-        }
-
-        .g-chip {
-            flex-shrink:0; padding:7px 14px; border-radius:14px; font-size:11px; font-weight:800;
-            background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color:rgba(255,255,255,.55);
-            cursor:pointer; transition:all .2s; white-space:nowrap;
-        }
-        .g-chip:hover { border-color:rgba(255,255,255,.25); color:#fff; }
-        .g-chip.g-active {
-            background:linear-gradient(135deg,rgba(255,255,255,.18),rgba(255,255,255,.18));
-            border-color:rgba(255,255,255,.4); color:#fff;
-        }
-
-        /* ── Lightbox viewer ── */
-        #g-viewer {
-            display:none; position:fixed; inset:0; z-index:9500; background:#000;
-            flex-direction:column;
-        }
-        #g-viewer.g-open { display:flex; }
-        .g-viewer-top { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; }
-        .g-viewer-btn {
-            width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center;
-            background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); color:#fff; cursor:pointer;
-        }
-        .g-viewer-btn.g-liked { color:#CCCCCC; border-color:rgba(255,255,255,.4); background:rgba(255,255,255,.1); }
-        .g-viewer-stage { flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
-        .g-viewer-stage img { max-width:100%; max-height:100%; object-fit:contain; }
-        .g-viewer-bottom { display:flex; justify-content:center; gap:10px; padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px)); }
-
-        /* ── Empty state ── */
-        .g-empty { text-align:center; padding:70px 20px; color:rgba(255,255,255,.35); }
-        .g-empty i { font-size:44px; opacity:.3; margin-bottom:14px; display:block; }
-
-        /* ── Admin uploader ── */
-        .g-drop {
-            border:2px dashed rgba(255,255,255,.25); border-radius:18px; padding:28px 16px; text-align:center;
-            cursor:pointer; transition:all .2s; background:rgba(255,255,255,.02);
-        }
-        .g-drop:hover, .g-drop.g-drag { border-color:rgba(255,255,255,.5); background:rgba(255,255,255,.05); }
-        .g-progress-wrap { width:100%; height:6px; border-radius:3px; background:rgba(255,255,255,.08); overflow:hidden; }
-        .g-progress-bar { height:100%; width:0%; background:linear-gradient(90deg,#FFFFFF,#FFFFFF); transition:width .2s; }
-
-        /* ── HEADER LOGO ── */
-        .brand-logo-container { display: flex; align-items: center; gap: 15px; }
-        .header-logo-image {
-            height: 50px; width: 50px;
-            aspect-ratio: 1/1;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 2px solid var(--primary);
-            box-shadow: 0 0 20px rgba(255,255,255,0.35), 0 0 60px rgba(255,255,255,0.1);
-            animation: logoPulse 3s ease-in-out infinite;
-        }
-        @keyframes logoPulse {
-            0%,100% { box-shadow: 0 0 20px rgba(255,255,255,0.3), 0 0 60px rgba(255,255,255,0.1); }
-            50%      { box-shadow: 0 0 35px rgba(255,255,255,0.6), 0 0 80px rgba(255,255,255,0.25); }
-        }
-
-        /* ── HEADER ── */
-        header {
-            background: rgba(0,0,0,0.9) !important;
-            border-bottom: 1px solid #333333 !important;
-            backdrop-filter: blur(20px);
-        }
-
-        /* ── HAMBURGER MENU ── */
-        #hamburger-btn {
-            width: 44px; height: 44px;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.2);
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            gap: 5px; cursor: pointer;
-            transition: 0.3s;
-        }
-        #hamburger-btn:hover { background: rgba(255,255,255,0.12); }
-        #hamburger-btn span {
-            display: block;
-            width: 22px; height: 2px;
-            background: var(--primary);
-            border-radius: 2px;
-            transition: 0.3s;
-        }
-        #hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        #hamburger-btn.open span:nth-child(2) { opacity: 0; }
-        #hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-        #menu-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 200;
-            display: none;
-            backdrop-filter: blur(4px);
-        }
-        #hamburger-menu {
-            position: fixed;
-            top: 0; right: -340px;
-            width: 320px; height: 100vh;
-            background: rgba(0,0,0,0.98);
-            border-left: 1px solid rgba(255,255,255,0.12);
-            z-index: 201;
-            transition: right 0.4s cubic-bezier(0.4,0,0.2,1);
-            overflow-y: auto;
-            padding: 0;
-        }
-        #hamburger-menu.open { right: 0; }
-
-        .menu-section-title {
-            font-size: 9px;
-            font-weight: 800;
-            letter-spacing: 3px;
-            color: rgba(255,255,255,0.4);
-            text-transform: uppercase;
-            padding: 0 20px;
-            margin: 0 0 8px;
-        }
-        .menu-item {
-            display: flex; align-items: center; gap: 14px;
-            padding: 14px 20px;
-            cursor: pointer;
-            transition: 0.2s;
-            border-radius: 0;
-            border-left: 3px solid transparent;
-        }
-        .menu-item:hover {
-            background: rgba(255,255,255,0.05);
-            border-left-color: var(--primary);
-        }
-        .menu-item .icon-wrap {
-            width: 40px; height: 40px;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-
-        /* ── TOOL MODAL ── */
-        #tool-modal {
-            position: fixed; inset: 0;
-            display: none;
-            align-items: center; justify-content: center;
-            z-index: 300;
-            padding: 16px;
-        }
-        #tool-modal.show { display: flex; }
-        .tool-modal-bg {
-            position: absolute; inset: 0;
-            background: rgba(0,0,0,0.75);
-            backdrop-filter: blur(10px);
-        }
-        .tool-modal-content {
-            position: relative;
-            background: #0A0A0A;
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 24px;
-            width: 100%; max-width: 360px;
-            padding: 28px;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.7), 0 0 60px rgba(255,255,255,0.06);
-            animation: modalPop 0.35s cubic-bezier(0.34,1.56,0.64,1);
-        }
-        @keyframes modalPop {
-            from { opacity: 0; transform: scale(0.85) translateY(20px); }
-            to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        /* Calculator */
-        .calc-display {
-            background: #000;
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 14px;
-            padding: 16px;
-            text-align: right;
-            margin-bottom: 16px;
-        }
-        .calc-display .calc-expr { color: rgba(255,255,255,0.35); font-size: 13px; min-height: 18px; }
-        .calc-display .calc-result { color: var(--primary); font-size: 32px; font-weight: 800; font-family: 'Orbitron', monospace; }
-        .calc-btn {
-            border-radius: 12px;
-            padding: 14px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.15s;
-            border: none;
-        }
-        .calc-btn:active { transform: scale(0.93); }
-        .cb-num  { background: rgba(255,255,255,0.06); color: #fff; }
-        .cb-num:hover  { background: rgba(255,255,255,0.12); }
-        .cb-op   { background: rgba(255,255,255,0.1); color: var(--primary); }
-        .cb-op:hover   { background: rgba(255,255,255,0.2); }
-        .cb-eq   { background: linear-gradient(135deg, #FFFFFF, #FFFFFF); color:#000000; }
-        .cb-eq:hover   { filter: brightness(1.15); }
-        .cb-clr  { background: rgba(255,60,60,0.12); color: #ff4444; }
-        .cb-clr:hover  { background: rgba(255,60,60,0.22); }
-
-        /* Timer */
-        .timer-display {
-            font-family: 'Orbitron', monospace;
-            font-size: 52px;
-            font-weight: 900;
-            text-align: center;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1;
-            margin: 20px 0;
-        }
-        .timer-btn {
-            padding: 12px 28px;
-            border-radius: 100px;
-            font-weight: 800;
-            font-size: 13px;
-            cursor: pointer;
-            border: none;
-            transition: 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Unit Converter */
-        .converter-input {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 12px 16px;
-            color: #fff;
-            font-size: 15px;
-            width: 100%;
-            outline: none;
-        }
-        .converter-input:focus { border-color: var(--primary); }
-        .converter-select {
-            background: #0A0A0A;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 10px 14px;
-            color: #fff;
-            font-size: 13px;
-            width: 100%;
-            outline: none;
-        }
-        .converter-select:focus { border-color: var(--primary); }
-
-        /* ════ NOTIFICATION BELL PANEL ════ */
-        @keyframes bellPanelIn {
-            from { opacity:0; transform: translateY(-12px) scale(0.95); }
-            to   { opacity:1; transform: translateY(0) scale(1); }
-        }
-        #notif-bell-panel { animation: bellPanelIn 0.28s cubic-bezier(0.34,1.4,0.64,1); }
-        #notif-bell-btn { transition: all 0.25s; }
-        #notif-bell-btn:hover { background: rgba(255,255,255,0.12) !important; transform: scale(1.08); }
-        .bell-notif-item {
-            padding: 12px 14px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.06);
-            background: rgba(255,255,255,0.02);
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-            position: relative;
-        }
-        .bell-notif-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.18); }
-        .bell-notif-item.unread { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.04); }
-        .bell-notif-item.unread::before {
-            content: '';
-            position: absolute;
-            top: 12px; left: 12px;
-            width: 7px; height: 7px;
-            border-radius: 50%;
-            background: #ef4444;
-            box-shadow: 0 0 8px rgba(239,68,68,0.6);
-        }
-        .bell-notif-title { color: #fff; font-weight: 800; font-size: 12px; margin: 0 0 3px; padding-left: 14px; }
-        .bell-notif-item:not(.unread) .bell-notif-title { padding-left: 0; }
-        .bell-notif-meta { color: #CCCCCC; font-size: 10px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-        .bell-notif-preview { color: #CCCCCC; font-size: 11px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* Notification viewer list in admin */
-        .notif-viewer-chip {
-            display: inline-flex; align-items: center; gap: 5px;
-            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 100px; padding: 3px 10px;
-            color: var(--primary); font-size: 10px; font-weight: 700;
-            margin: 2px;
-        }
-        /* Subject new-PDF badge */
-        .subj-new-badge {
-            display: inline-block;
-            background: #ef4444;
-            color: white;
-            font-size: 8px;
-            font-weight: 900;
-            border-radius: 100px;
-            padding: 2px 6px;
-            position: absolute;
-            top: -6px; right: -6px;
-            border: 2px solid #000000;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 0 10px rgba(239,68,68,0.5);
-            animation: pulseBadge 1.8s ease-in-out infinite;
-        }
-        @keyframes pulseBadge {
-            0%,100% { box-shadow: 0 0 8px rgba(239,68,68,0.5); }
-            50% { box-shadow: 0 0 18px rgba(239,68,68,0.85); }
-        }
-        body.light-mode #notif-bell-panel { background: #ffffff; border-color: rgba(255,255,255,0.3); }
-        body.light-mode .bell-notif-item { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.08); }
-        body.light-mode .bell-notif-title { color: #1a1a2e; }
-        body.light-mode .bell-notif-preview { color: #CCCCCC; }
-
-        .chapter-card-glow:hover { box-shadow: 0 8px 40px rgba(255,255,255,0.15); }
-
-        /* ════ NEON BADGE LABEL ════ */
-        .neon-label {
-            display: inline-block;
-            font-family: 'Orbitron', monospace;
-            font-weight: 900;
-            font-style: italic;
-            color: #000000;
-            background: rgba(255,255,255,0.9);
-            border: 2px solid var(--primary);
-            border-radius: 8px;
-            padding: 4px 12px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            box-shadow: 0 0 10px rgba(255,255,255,0.5), 0 0 24px rgba(255,255,255,0.2), inset 0 0 8px rgba(255,255,255,0.06);
-            text-shadow: 0 0 10px rgba(255,255,255,0.8);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-        }
-        .neon-label-sm { font-size: 10px; padding: 3px 9px; border-radius: 6px; letter-spacing: 1px; }
-        .neon-label-lg {
-            font-size: 20px; padding: 7px 20px; border-radius: 12px; letter-spacing: 3px;
-            box-shadow: 0 0 16px rgba(255,255,255,0.7), 0 0 40px rgba(255,255,255,0.3), inset 0 0 14px rgba(255,255,255,0.08);
-        }
-        .neon-label-purple {
-            border-color: var(--secondary);
-            box-shadow: 0 0 8px rgba(255,255,255,0.75), 0 0 22px rgba(255,255,255,0.35), inset 0 0 8px rgba(255,255,255,0.08);
-            text-shadow: 0 0 10px rgba(255,255,255,0.8);
-        }
-        .neon-section-line { flex: 1; height: 1px; background: linear-gradient(90deg, rgba(255,255,255,0.4), transparent); }
-
-        /* ── SUBJECT ICON ANIMATION ── */
-        .subject-icon-3d { transition: 0.35s cubic-bezier(0.4,0,0.2,1); transform-style: preserve-3d; }
-        .card-hover:hover .subject-icon-3d { transform: rotateY(15deg) rotateX(-10deg) scale(1.1); }
-
-        /* ── PROGRESS BAR ── */
-        .progress-bar { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.06); overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #FFFFFF, var(--primary)); animation: progressLoad 1.2s ease-out forwards; }
-        @keyframes progressLoad { from { width: 0; } }
-
-        /* ── STAT CARDS ── */
-        .stat-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 20px; padding: 20px; text-align: center; transition: 0.3s;
-        }
-        .stat-card:hover { border-color: var(--primary); background: rgba(255,255,255,0.05); }
-
-        /* ── TIPS PAGE ── */
-        .tip-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 20px; padding: 22px 24px; transition: 0.3s;
-            position: relative; overflow: hidden;
-        }
-        .tip-card::before {
-            content: ''; position: absolute; top: 0; left: 0;
-            width: 4px; height: 100%;
-            background: linear-gradient(180deg, var(--primary), #FFFFFF);
-        }
-        .tip-card:hover { border-color: rgba(255,255,255,0.25); transform: translateX(4px); }
-
-        /* ── RESOURCES PAGE ── */
-        .resource-pill {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18);
-            border-radius: 100px; padding: 6px 16px;
-            font-size: 11px; font-weight: 700; color: var(--primary);
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-
-        /* ── FLOATING PARTICLES (CSS) ── */
-        .css-particle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; animation: floatUp linear infinite; }
-        @keyframes floatUp {
-            0%   { transform: translateY(110vh) scale(0); opacity: 0; }
-            10%  { opacity: 1; }
-            90%  { opacity: 0.5; }
-            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
-        }
-
-        /* ── SCROLLBAR ── */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #000000; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
-
-        /* ── NAV BREADCRUMB ── */
-        .breadcrumb { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.3); font-size: 11px; }
-        .breadcrumb span { color: var(--primary); }
-
-        /* ── INPUT FOCUS ── */
-        input:focus, select:focus {
-            border-color: var(--primary) !important;
-            box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
-            outline: none;
-        }
-
-        /* ── BADGE PULSE ── */
-        @keyframes badgePulse {
-            0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
-            50%      { box-shadow: 0 0 0 8px rgba(255,255,255,0); }
-        }
-        #statusBadge { animation: badgePulse 2s ease infinite; }
-
-        /* ── CHAPTER ROW ── */
-        .chapter-row { transition: all 0.25s ease; }
-        .chapter-row:hover {
-            background: rgba(255,255,255,0.04) !important;
-            border-color: rgba(255,255,255,0.2) !important;
-            transform: translateX(5px);
-        }
-
-        /* ── SHINE SWEEP ── */
-        .shine-sweep { position: relative; overflow: hidden; }
-        .shine-sweep::after {
-            content: ''; position: absolute; top: -50%; left: -75%;
-            width: 50%; height: 200%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.04), transparent);
-            transform: skewX(-20deg);
-            animation: shineSweep 5s ease-in-out infinite;
-        }
-        @keyframes shineSweep { 0%,100% { left: -75%; } 50% { left: 125%; } }
-
-        /* ── RESPONSIVE ── */
-        @media(max-width:640px) { #hamburger-menu { width: 290px; } .calc-result { font-size: 26px !important; } }
-
-        /* ── FEEDBACK STARS ── */
-        .fb-star { font-size: 30px; cursor: pointer; transition: transform 0.15s; color: rgba(255,255,255,0.12); user-select: none; }
-        .fb-star.lit { color: #CCCCCC; transform: scale(1.15); }
-        .fb-cat { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 800; border: 1px solid rgba(255,255,255,0.1); color: rgba(204,204,204,1); cursor: pointer; transition: all 0.2s; }
-        .fb-cat.sel { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.4); color: var(--primary); }
-        .adfb-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 14px 16px; margin-bottom: 10px; transition: 0.2s; }
-        .adfb-card:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.15); }
-
-        /* ════ PROGRESS TRACKER ════ */
-        .progress-ring { transition: stroke-dashoffset 0.8s cubic-bezier(0.4,0,0.2,1); }
-        .subject-prog-bar { height:6px; border-radius:10px; background:rgba(255,255,255,0.06); overflow:hidden; }
-        .subject-prog-fill { height:100%; border-radius:10px; transition:width 1s cubic-bezier(0.4,0,0.2,1); }
-
-        /* ════ XP / LEVEL SYSTEM ════ */
-        .xp-bar-bg { height:8px; border-radius:10px; background:rgba(255,255,255,0.06); overflow:hidden; }
-        .xp-bar-fill { height:100%; border-radius:10px; background:linear-gradient(90deg,#FFFFFF,var(--primary)); transition:width 0.8s cubic-bezier(0.4,0,0.2,1); }
-        .badge-card { border-radius:16px; padding:12px; text-align:center; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); transition:0.3s; }
-        .badge-card.earned { border-color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.06); }
-        .badge-card.earned:hover { transform:translateY(-3px); box-shadow:0 10px 30px rgba(255,255,255,0.15); }
-
-        /* ════ STREAK SYSTEM ════ */
-        .streak-day { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; }
-        .streak-day.done { background:linear-gradient(135deg,#FFFFFF,#FFFFFF); color:#000000; }
-        .streak-day.today { background:rgba(255,255,255,0.12); border:2px solid rgba(255,255,255,0.4); color:var(--primary); }
-        .streak-day.miss { background:rgba(255,255,255,0.04); color:rgba(204,204,204,0.5); border:1px solid rgba(255,255,255,0.06); }
-
-        /* ════ NOTIFICATION SYSTEM ════ */
-        #notif-popup {
-            position: fixed; bottom: 24px; right: 24px;
-            width: min(340px, calc(100vw - 32px));
-            background: rgba(0,0,0,0.97);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 30px rgba(255,255,255,0.06);
-            z-index: 800; overflow: hidden;
-            animation: notifSlideIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
-            backdrop-filter: blur(30px);
-        }
-        #notif-popup.notif-hide { animation: notifSlideOut 0.4s ease-in forwards; }
-        @keyframes notifSlideIn { from { opacity:0; transform:translateY(30px) scale(0.92); } to { opacity:1; transform:translateY(0) scale(1); } }
-        @keyframes notifSlideOut { from { opacity:1; transform:translateY(0) scale(1); } to { opacity:0; transform:translateY(30px) scale(0.92); } }
-        .notif-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px 8px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 8px rgba(255,255,255,0.7); animation: notifDotPulse 1.5s ease-in-out infinite; }
-        @keyframes notifDotPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
-        .notif-body { padding: 14px 16px 16px; }
-        .notif-media { width:100%; border-radius:12px; margin-bottom:12px; overflow:hidden; }
-        .notif-media img { width:100%; height:160px; object-fit:cover; border-radius:12px; display:block; }
-        .notif-media iframe { width:100%; height:180px; border:none; border-radius:12px; display:block; }
-        .notif-text { color:rgba(255,255,255,0.9); font-size:13px; line-height:1.6; }
-        .notif-close-btn { width:28px; height:28px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:rgba(204,204,204,1); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:11px; transition:0.2s; }
-        .notif-close-btn:hover { background:rgba(255,60,60,0.2); color:#ff4444; }
-        .notif-type-btn { padding:8px 16px; border-radius:10px; font-size:11px; font-weight:800; cursor:pointer; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.03); color:rgba(204,204,204,1); transition:0.2s; text-transform:uppercase; letter-spacing:1px; }
-        .notif-type-btn.active { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.35); color:var(--primary); }
-        .saved-notif-item { display:flex; align-items:flex-start; justify-content:space-between; padding:10px 12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:12px; gap:10px; }
-
-        /* ════ TIMETABLE ════ */
-        .tt-slot { border-radius:12px; padding:10px 14px; border:1px dashed rgba(255,255,255,0.12); cursor:pointer; transition:0.2s; min-height:48px; display:flex; align-items:center; justify-content:center; font-size:12px; color:rgba(204,204,204,1); }
-        .tt-slot.filled { border-style:solid; cursor:default; }
-        .tt-slot:not(.filled):hover { border-color:rgba(255,255,255,0.3); color:var(--primary); }
-
-        /* ════ LIGHT MODE ════ */
-        body.light-mode { background: #f0f4f8; color: #1a1a2e; }
-        body.light-mode .glass-ui { background: rgba(255,255,255,0.7); border-color: rgba(0,0,0,0.08); color: #1a1a2e; }
-        body.light-mode .glass-login { background: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.25); }
-        body.light-mode header { background: rgba(255,255,255,0.85) !important; border-color: rgba(0,0,0,0.08) !important; }
-        body.light-mode #hamburger-menu { background: rgba(240,244,248,0.97); border-color: rgba(255,255,255,0.2); }
-        body.light-mode .menu-item:hover { background: rgba(255,255,255,0.08); }
-        body.light-mode .tool-modal-content { background: #ffffff; border-color: rgba(255,255,255,0.3); }
-        body.light-mode input, body.light-mode select, body.light-mode textarea { background: rgba(0,0,0,0.04) !important; color: #1a1a2e !important; border-color: rgba(0,0,0,0.15) !important; }
-        body.light-mode .text-gray-400 { color: #CCCCCC !important; }
-        body.light-mode .text-gray-500 { color: #CCCCCC !important; }
-        body.light-mode .text-gray-600 { color: #718096 !important; }
-        body.light-mode .text-white { color: #1a1a2e !important; }
-        body.light-mode #notif-popup { background: rgba(255,255,255,0.95); border-color: rgba(255,255,255,0.3); }
-        body.light-mode .tip-card { background: rgba(255,255,255,0.7); border-color: rgba(0,0,0,0.06); }
-        body.light-mode .resource-pill { background: rgba(255,255,255,0.8); border-color: rgba(0,0,0,0.1); color:#1a1a2e; }
-        body.light-mode #hamburger-btn { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
-        body.light-mode footer { background: rgba(255,255,255,0.6); }
-        body.light-mode .cb-num { background: rgba(0,0,0,0.06); color:#1a1a2e; }
-        body.light-mode .adfb-card { background: rgba(255,255,255,0.6) !important; border-color: rgba(0,0,0,0.06) !important; }
-
-        /* ════ BACKGROUND PRESETS — flattened to one consistent deep navy theme per request ════ */
-        body.bg-galaxy, body.bg-midnight, body.bg-ocean, body.bg-forest,
-        body.bg-sunset, body.bg-aurora, body.bg-paper {
-            background: #000000 !important;
-        }
-        body.bg-light { background: #000000 !important; } /* light-mode handled separately by .light-mode below */
-
-        /* ════ VIEW TOGGLE ════ */
-        .view-toggle-btn { padding: 8px 16px; border-radius: 10px; font-size: 12px; font-weight: 800; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: rgba(204,204,204,1); transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
-        .view-toggle-btn.active { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.35); color: var(--primary); }
-
-        /* ════ SUBJECT ICON COLORS ════ */
-        .subj-icon-physics   { background:rgba(255,255,255,0.15)!important; border-color:rgba(255,255,255,0.3)!important; }
-        .subj-icon-physics i { color:#CCCCCC!important; }
-        .subj-icon-chemistry { background:rgba(255,255,255,0.15)!important; border-color:rgba(255,255,255,0.3)!important; }
-        .subj-icon-chemistry i { color:#CCCCCC!important; }
-        .subj-icon-biology   { background:rgba(255,255,255,0.15)!important; border-color:rgba(255,255,255,0.3)!important; }
-        .subj-icon-biology i { color:#2dd4bf!important; }
-        .subj-icon-math      { background:rgba(255,255,255,0.15)!important; border-color:rgba(255,255,255,0.3)!important; }
-        .subj-icon-math i    { color:#CCCCCC!important; }
-        .subj-icon-history   { background:rgba(239,68,68,0.15)!important; border-color:rgba(239,68,68,0.3)!important; }
-        .subj-icon-history i { color:#f87171!important; }
-        .subj-icon-geography { background:rgba(255,255,255,0.15)!important; border-color:rgba(255,255,255,0.3)!important; }
-        .subj-icon-geography i { color:#38bdf8!important; }
-        .subj-icon-computer  { background:rgba(255,255,255,0.12)!important; border-color:rgba(255,255,255,0.25)!important; }
-        .subj-icon-computer i { color:var(--primary)!important; }
-        .subj-icon-hindi     { background:rgba(255,255,255,0.15)!important; border-color:rgba(255,255,255,0.3)!important; }
-        .subj-icon-hindi i   { color:#CCCCCC!important; }
-        .subj-icon-english   { background:rgba(255,255,255,0.15)!important; border-color:rgba(255,255,255,0.3)!important; }
-        .subj-icon-english i { color:#CCCCCC!important; }
-        .subj-icon-civics    { background:rgba(255,255,255,0.15)!important; border-color:rgba(255,255,255,0.3)!important; }
-        .subj-icon-civics i  { color:#CCCCCC!important; }
-        .subj-icon-economy   { background:rgba(255,255,255,0.15)!important; border-color:rgba(255,255,255,0.3)!important; }
-        .subj-icon-economy i { color:#CCCCCC!important; }
-        .subj-icon-gallery   { background:rgba(255,255,255,0.1)!important; border-color:rgba(255,255,255,0.25)!important; }
-        .subj-icon-gallery i { color:var(--primary)!important; }
-
-        /* ════ SUBJECT LIST VIEW ════ */
-        .subject-list-item { display: flex; align-items: center; gap: 16px; padding: 16px 20px; border-radius: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: all 0.25s; margin-bottom: 8px; }
-        .subject-list-item:hover { border-color: var(--primary); background: rgba(255,255,255,0.05); transform: translateX(6px); }
-        .subject-list-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 22px; }
-
-        /* ════ GRADE VIEW ════ */
-        .grade-section-title { font-size: 10px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); padding: 16px 0 8px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 12px; }
-
-        /* ════ SETTINGS MODAL ════ */
-        #settings-modal { position: fixed; inset: 0; display: none; align-items: flex-end; justify-content: center; z-index: 400; padding: 0; }
-        #settings-modal.show { display: flex; }
-        .settings-bg { position: absolute; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); }
-        .settings-sheet { position: relative; background: #0A0A0A; border: 1px solid rgba(255,255,255,0.12); border-radius: 28px 28px 0 0; width: 100%; max-width: 480px; padding: 28px 24px 36px; animation: sheetUp 0.35s cubic-bezier(0.34,1.56,0.64,1); max-height: 85vh; overflow-y: auto; }
-        @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .bg-swatch { width: 44px; height: 44px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-        .bg-swatch:hover, .bg-swatch.active { border-color: var(--primary); transform: scale(1.1); }
-        .theme-btn { flex: 1; padding: 12px 8px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); cursor: pointer; transition: 0.2s; text-align: center; font-size: 11px; font-weight: 800; color: rgba(204,204,204,1); text-transform: uppercase; letter-spacing: 1px; }
-        .theme-btn.active { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.35); color: var(--primary); }
-
-        /* ════ THEME TOGGLE BUTTON in header ════ */
-        #theme-toggle-btn { width: 38px; height: 38px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; font-size: 15px; }
-        #theme-toggle-btn:hover { background: rgba(255,255,255,0.12); }
-
-        /* ════ KOLA AI STYLES ════ */
-        #step-kola-ai { display: none !important; }
-        #step-kola-ai.view-active { display: flex !important; flex-direction: column; position: fixed; inset: 0; top: 72px; bottom: 0; background: #000000; z-index: 600; overflow: hidden; }
-        #step-gallery.view-active { display: block !important; position: fixed; inset: 0; z-index: 9000; background: #000; padding: 0; margin: 0; }
-        #step-community.view-active { display: flex !important; flex-direction: column; position: fixed; inset: 0; z-index: 9000; background: #000000; overflow: hidden; }
-        #step-community-detail.view-active { display: flex !important; flex-direction: column; position: fixed; inset: 0; z-index: 9000; background: #000000; overflow: hidden; }
-        #step-community-create.view-active { display: flex !important; flex-direction: column; position: fixed; inset: 0; z-index: 9000; background: #000000; overflow: hidden; }
-
-        /* Hide bottom nav, footer, spacer completely when AI page is open */
-        body.kola-ai-open #bottom-nav,
-        body.kola-ai-open footer,
-        body.kola-ai-open #bottom-nav-spacer { display: none !important; }
-
-        /* Hide header/nav/footer completely when Gallery is open — needed
-           because .container establishes its own stacking context (see the
-           "position:relative;z-index:1" rule below), which traps any
-           z-index inside it (even 9000) below header/#bottom-nav, which
-           live in a separate, higher stacking context. Hiding them outright
-           is more reliable than trying to out-z-index a sibling context. */
-        body.kola-gallery-open header,
-        body.kola-gallery-open #bottom-nav,
-        body.kola-gallery-open footer,
-        body.kola-gallery-open #bottom-nav-spacer { display: none !important; }
-        body.kola-gallery-open #dev-chat-fab { display: none !important; }
-
-        /* Same treatment for Community — true full-screen, header/bottom-nav/
-           chat FAB all hidden, only the in-page back button remains. */
-        body.kola-community-open header,
-        body.kola-community-open #bottom-nav,
-        body.kola-community-open footer,
-        body.kola-community-open #bottom-nav-spacer { display: none !important; }
-        body.kola-community-open #dev-chat-fab { display: none !important; }
-
-        /* ══════════════════════════════════════════
-           FLOATING CHAT BUTTON — "Contact Alok"
-        ══════════════════════════════════════════ */
-        /* ═══════════════════════════════════════════════════════
-           KOLA SUPPORT CHAT — COMPLETE WHATSAPP-STYLE SYSTEM
-        ═══════════════════════════════════════════════════════ */
-
-        /* FAB Button */
-        #dev-chat-fab {
-            position: fixed;
-            bottom: 82px; right: 16px;
-            width: 56px; height: 56px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, #FFFFFF, #CCCCCC);
-            box-shadow: 0 4px 24px rgba(255,255,255,0.5);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 490; border: 1px solid #333333;
-            transition: transform 0.2s, box-shadow 0.2s;
-            animation: fabPulse 2.5s ease-in-out infinite;
-        }
-        #dev-chat-fab:active { transform: scale(0.92); }
-        #dev-chat-fab:hover  { transform: scale(1.08); }
-        @keyframes fabPulse {
-            0%,100% { box-shadow: 0 4px 24px rgba(255,255,255,0.5); }
-            50%      { box-shadow: 0 4px 40px rgba(255,255,255,0.85), 0 0 0 8px rgba(255,255,255,0.12); }
-        }
-        #dev-chat-fab .fab-tooltip {
-            position: absolute; right: 64px;
-            background: rgba(255,255,255,0.95); color:#000000;
-            font-size: 12px; font-weight: 700;
-            padding: 6px 12px; border-radius: 10px;
-            white-space: nowrap; pointer-events: none;
-            opacity: 0; transition: opacity 0.2s;
-            border: 1px solid rgba(255,255,255,0.35);
-            backdrop-filter: blur(8px);
-        }
-        #dev-chat-fab:hover .fab-tooltip { opacity: 1; }
-        #kola-fab-badge {
-            position: absolute; top: -4px; right: -4px;
-            background: #ef4444; color: #fff;
-            font-size: 9px; font-weight: 900;
-            min-width: 18px; height: 18px;
-            border-radius: 9px; padding: 0 4px;
-            display: none; align-items: center; justify-content: center;
-            border: 2px solid #000000;
-        }
-        #kola-fab-badge.show { display: flex; }
-        body.kola-ai-open #dev-chat-fab { bottom: 90px; }
-
-        /* ── FULL-SCREEN CHAT OVERLAY ── */
-        #kola-chat-screen {
-            position: fixed; inset: 0;
-            z-index: 10000;
-            background: #000000;
-            display: flex; flex-direction: column;
-            transform: translateX(100%);
-            transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
-        }
-        #kola-chat-screen.open { transform: translateX(0); }
-
-        /* Chat top bar */
-        #kola-chat-topbar {
-            display: flex; align-items: center; gap: 12px;
-            padding: 0 14px;
-            height: 64px;
-            background: rgba(10,10,10,0.96);
-            backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-            border-bottom: 1px solid #333333;
-            flex-shrink: 0;
-            position: sticky; top: 0; z-index: 5;
-        }
-        #kola-chat-topbar::after {
-            content:'';
-            position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-        }
-        .kola-topbar-avatar {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: linear-gradient(135deg,var(--primary),#CCCCCC);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 900; font-size: 16px; color: #000000;
-            flex-shrink: 0; overflow: hidden; position: relative;
-            border: 2px solid rgba(255,255,255,0.4);
-        }
-        .kola-topbar-avatar img { width:100%;height:100%;object-fit:cover; }
-        .kola-presence-dot {
-            position: absolute; bottom: -1px; right: -1px;
-            width: 11px; height: 11px; border-radius: 50%;
-            background: var(--primary); border: 2px solid #000000;
-            box-shadow: 0 0 6px rgba(255,255,255,0.8);
-            animation: presencePulse 2s ease-in-out infinite;
-        }
-        @keyframes presencePulse { 0%,100%{ box-shadow: 0 0 4px rgba(255,255,255,0.6);} 50%{ box-shadow: 0 0 9px rgba(255,255,255,0.95);} }
-        #kola-chat-topbar .kola-topbar-back {
-            width: 38px; height: 38px; border-radius: 50%;
-            background: rgba(255,255,255,0.06); border: none;
-            color: #aaa; font-size: 16px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; transition: 0.2s;
-        }
-        #kola-chat-topbar .kola-topbar-back:hover { background: rgba(255,255,255,0.15); color: var(--primary); }
-        .kola-topbar-info { flex: 1; min-width: 0; }
-        .kola-topbar-name { font-weight: 800; font-size: 15px; color: #FFFFFF; letter-spacing: 0.1px; }
-        .kola-topbar-status { font-size: 11px; color: var(--primary); margin-top: 1px; }
-
-        /* Messages container */
-        #kola-chat-messages {
-            flex: 1; overflow-y: auto;
-            padding: 10px 8px 8px;
-            display: flex; flex-direction: column; gap: 3px;
-            background: #000000;
-            scrollbar-width: thin; scrollbar-color: #1A1A1A transparent;
-        }
-        /* Watermark pattern */
-        #kola-chat-messages::before {
-            content: '';
-            position: fixed; inset: 62px 0 0 0;
-            pointer-events: none; z-index: 0;
-            background-image: none;
-            background-size: 28px 28px;
-        }
-
-        /* Date divider */
-        .kola-date-sep {
-            text-align: center; font-size: 11px; font-weight: 700;
-            color: rgba(255,255,255,0.35);
-            background: rgba(0,0,0,0.4); border-radius: 10px;
-            padding: 3px 12px; margin: 6px auto; width: fit-content;
-            border: 1px solid rgba(255,255,255,0.06);
-            backdrop-filter: blur(8px); position: relative; z-index: 1;
-        }
-
-        /* Message rows */
-        .kola-msg-row-chat {
-            display: flex; position: relative; z-index: 1;
-            animation: msgIn 0.22s ease-out;
-        }
-        @keyframes msgIn {
-            from { opacity:0; transform: translateY(10px) scale(0.97); }
-            to   { opacity:1; transform: translateY(0) scale(1); }
-        }
-        .kola-msg-row-chat.sent  { justify-content: flex-end; }
-        .kola-msg-row-chat.recv  { justify-content: flex-start; align-items: flex-end; gap: 8px; }
-
-        /* Avatar in received messages */
-        .kola-recv-avatar {
-            width: 30px; height: 30px; border-radius: 50%;
-            background: linear-gradient(135deg,#8A6A1E,#FFFFFF);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 12px; font-weight: 900; color: #fff;
-            flex-shrink: 0; overflow: hidden;
-        }
-        .kola-recv-avatar img { width:100%;height:100%;object-fit:cover; }
-
-        /* Bubbles — redesigned: softer glass surface, tighter radius curve, subtle lift on tap.
-           Sent bubbles fade from solid green into transparent, letting the chat background
-           show through toward the tail — tighter side padding keeps the box compact. */
-        .kola-bubble-chat {
-            max-width: 78%; padding: 9px 12px 6px;
-            border-radius: 20px; font-size: 14.5px; line-height: 1.55;
-            word-break: break-word; position: relative;
-            transition: transform 0.15s cubic-bezier(.4,0,.2,1), box-shadow 0.15s ease;
-            touch-action: pan-y;
-        }
-        .kola-bubble-chat.sent {
-            background: #E5E5E5;
-            color: #000000;
-            border-bottom-right-radius: 5px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-        }
-        .kola-bubble-chat.recv {
-            background: linear-gradient(155deg,#1A1A1A,#0A0A0A);
-            color: #FFFFFF;
-            border-bottom-left-radius: 5px;
-            border: 1px solid rgba(255,255,255,0.07);
-            box-shadow: 0 3px 12px rgba(0,0,0,0.35);
-        }
-        .kola-bubble-chat:active { transform: scale(0.985); }
-
-        /* ── Multi-image grid inside a bubble (new: multiple photos per message) ── */
-        .kola-img-grid {
-            display: grid; gap: 3px; border-radius: 14px; overflow: hidden;
-            margin-top: 2px; margin-bottom: 4px;
-        }
-        .kola-img-grid.n1 { grid-template-columns: 1fr; }
-        .kola-img-grid.n2 { grid-template-columns: 1fr 1fr; }
-        .kola-img-grid.n3 { grid-template-columns: 1fr 1fr; }
-        .kola-img-grid.n3 .kola-grid-item:first-child { grid-row: span 2; }
-        .kola-img-grid.n4plus { grid-template-columns: 1fr 1fr; }
-        .kola-grid-item { position: relative; cursor: pointer; background: #000; overflow: hidden; }
-        .kola-grid-item img {
-            width: 100%; height: 100%; min-height: 90px; max-height: 190px;
-            object-fit: cover; display: block; transition: transform .25s ease;
-        }
-        .kola-grid-item:active img { transform: scale(1.04); }
-        .kola-grid-more-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.55);
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 20px; font-weight: 900;
-            font-family: 'Orbitron', monospace;
-        }
-        /* ── Optimistic send: image appears instantly with an upload ring, exactly like WhatsApp ── */
-        .kola-msg-row-chat.kola-optimistic .kola-bubble-chat { opacity: 0.92; }
-        .kola-uploading-overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.42);
-            display: flex; align-items: center; justify-content: center;
-            flex-direction: column; gap: 4px;
-        }
-        .kola-upload-ring {
-            width: 30px; height: 30px; border-radius: 50%;
-            border: 3px solid rgba(255,255,255,0.28); border-top-color: #fff;
-            animation: kolaUploadSpin 0.75s linear infinite;
-        }
-        @keyframes kolaUploadSpin { to { transform: rotate(360deg); } }
-        .kola-upload-pct { font-size: 10px; font-weight: 800; color: #fff; font-family: 'Orbitron', monospace; }
-        .kola-send-fail-badge {
-            position: absolute; bottom: 4px; right: 4px; width: 20px; height: 20px;
-            border-radius: 50%; background: #ef4444; color: #fff; font-size: 10px;
-            display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-        }
-        .kola-bubble-sender {
-            font-size: 11px; font-weight: 800; color: var(--secondary);
-            margin-bottom: 4px;
-        }
-        .kola-bubble-time {
-            font-size: 10px; color: rgba(255,255,255,0.3);
-            text-align: right; margin-top: 5px;
-            display: flex; align-items: center; justify-content: flex-end; gap: 4px;
-        }
-        .kola-bubble-chat.sent .kola-bubble-time { color: rgba(0,0,0,0.55); }
-        .kola-read-tick { font-size: 12px; color: rgba(0,0,0,0.55); }
-
-        /* ── Multi-image attach preview — exact WhatsApp style: 2-col grid, same
-           shape as a sent grouped-image bubble, with a spinning progress ring
-           + cancel (X) overlay while uploading ── */
-        .kola-img-preview-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 3px;
-            border-radius: 14px; overflow: hidden; position: relative;
-            max-width: 260px;
-        }
-        .kola-img-preview-grid .kip-item {
-            position: relative; aspect-ratio: 1/1; overflow: hidden; background: #000;
-        }
-        .kola-img-preview-grid .kip-item img { width:100%; height:100%; object-fit:cover; display:block; }
-        .kola-img-preview-grid .kip-remove {
-            position: absolute; top: 5px; right: 5px; width: 22px; height: 22px;
-            border-radius: 50%; background: rgba(0,0,0,0.65); border: none;
-            color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 2;
-        }
-        .kola-img-preview-grid .kip-add {
-            aspect-ratio: 1/1;
-            border: 2px dashed rgba(255,255,255,0.4); background: rgba(255,255,255,0.06);
-            color: var(--primary); display: flex; align-items: center; justify-content: center;
-            font-size: 20px; cursor: pointer;
-        }
-        .kola-img-preview-grid .kip-more-badge {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.55);
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 22px; font-weight: 900; font-family: 'Orbitron', monospace;
-        }
-        /* Upload-in-progress overlay: covers the whole grid, spinning ring + X to cancel */
-        .kola-upload-overlay {
-            position: absolute; inset: 0; z-index: 6;
-            background: rgba(0,0,0,0.42);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .kola-upload-ring {
-            position: relative; width: 56px; height: 56px; border-radius: 50%;
-            background: conic-gradient(var(--primary) 0deg, rgba(255,255,255,0.15) 0deg);
-            animation: kolaRingSpin 1s linear infinite;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .kola-upload-ring::after {
-            content: ''; position: absolute; inset: 4px; border-radius: 50%; background: #000000;
-        }
-        .kola-upload-cancel {
-            position: relative; z-index: 1; width: 34px; height: 34px; border-radius: 50%;
-            background: rgba(255,255,255,0.08); border: none; color: #fff; font-size: 13px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-        }
-        @keyframes kolaRingSpin { to { transform: rotate(360deg); } }
-        .kola-upload-pct {
-            position: absolute; bottom: -20px; left: 0; right: 0; text-align: center;
-            font-size: 10px; color: rgba(255,255,255,0.7); font-family: 'Orbitron', monospace;
-        }
-
-        /* File attachments removed — text-only chat */
-
-        /* Typing indicator */
-        #kola-typing-indicator {
-            display: none; align-items: center; gap: 8px;
-            padding: 4px 12px 8px; position: relative; z-index: 1;
-        }
-        #kola-typing-indicator.show { display: flex; }
-        .kola-typing-dots { display: flex; gap: 4px; }
-        .kola-typing-dot {
-            width: 7px; height: 7px; border-radius: 50%;
-            background: #FFFFFF;
-            animation: typingBounce 1.2s ease-in-out infinite;
-        }
-        .kola-typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .kola-typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typingBounce {
-            0%,80%,100% { transform: scale(0.6); opacity: 0.4; }
-            40%          { transform: scale(1.1); opacity: 1; }
-        }
-
-        /* ── Stories progress bar fill animation ── */
-        @keyframes storyFill {
-            from { width: 0%; }
-            to   { width: 100%; }
-        }
-
-        .kola-menu-item { padding: 13px 16px; font-size: 13.5px; font-weight: 600; color: #FFFFFF; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .kola-menu-item:last-child { border-bottom: none; }
-        .kola-menu-item:active { background: rgba(255,255,255,0.1); }
-
-        .kola-bubble-chat.kola-selected { outline: 2px solid var(--primary); outline-offset: 2px; background-color: var(--primary-dim) !important; }
-
-        /* ── Reply quote block (shown inside a bubble that is replying to another message) ── */
-        .kola-reply-quote {
-            display: block; font-size: 11.5px; line-height: 1.4;
-            padding: 5px 9px; margin-bottom: 6px; border-radius: 8px;
-            border-left: 3px solid var(--secondary);
-            background: rgba(0,0,0,0.18); color: rgba(255,255,255,0.65);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            cursor: pointer;
-        }
-        .kola-bubble-chat.recv .kola-reply-quote { background: rgba(255,255,255,0.05); }
-
-        /* ── Reactions under a bubble ── */
-        .kola-reactions-row { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
-        .kola-reaction-chip {
-            display: inline-flex; align-items: center; gap: 2px;
-            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 999px; font-size: 12px; padding: 2px 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.35); cursor: default;
-            backdrop-filter: blur(4px); animation: msgIn 0.18s ease-out;
-        }
-
-        /* ── Long-press context menu (Reply / Copy / React / Star / Select / Delete) ── */
-        .kola-msg-ctxmenu {
-            position: fixed; z-index: 9999; min-width: 190px;
-            background: #0A0A0A; border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 14px; overflow: hidden;
-            box-shadow: 0 14px 40px rgba(0,0,0,0.55);
-            animation: msgIn 0.14s ease-out;
-        }
-        .kola-ctx-item {
-            display: flex; align-items: center; gap: 11px; width: 100%;
-            padding: 11px 15px; background: none; border: none; cursor: pointer;
-            color: #FFFFFF; font-size: 13.5px; font-weight: 600;
-            font-family: 'Plus Jakarta Sans', sans-serif; text-align: left;
-        }
-        .kola-ctx-item i { width: 15px; text-align: center; color: var(--primary); font-size: 13px; }
-        .kola-ctx-item:hover { background: rgba(255,255,255,0.1); }
-        .kola-ctx-item.danger { color: #f87171; }
-        .kola-ctx-item.danger i { color: #f87171; }
-
-        /* ── Quick reaction picker (pops up above a bubble) ── */
-        .kola-reaction-picker {
-            position: absolute; top: -46px; left: 0; z-index: 40;
-            display: flex; gap: 3px; background: #0A0A0A;
-            border: 1px solid rgba(255,255,255,0.25); border-radius: 999px;
-            padding: 6px 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            animation: msgIn 0.14s ease-out;
-        }
-        .kola-reaction-picker button {
-            background: none; border: none; font-size: 19px; line-height: 1;
-            cursor: pointer; padding: 2px; transition: transform 0.12s;
-        }
-        .kola-reaction-picker button:hover { transform: scale(1.25); }
-
-        /* ── Reply preview bar (above the composer, shown while replying) ── */
-        .kola-reply-preview-bar {
-            display: none; align-items: center; gap: 10px;
-            padding: 8px 14px; background: #000000;
-            border-top: 1px solid rgba(255,255,255,0.12);
-            border-left: 3px solid var(--secondary);
-        }
-        .kola-reply-preview-bar .krp-text {
-            flex: 1; min-width: 0; font-size: 12.5px; color: rgba(255,255,255,0.6);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .kola-reply-preview-bar .krp-label { color: var(--primary); font-weight: 800; margin-right: 4px; }
-        .kola-reply-preview-bar button {
-            width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0;
-            background: rgba(255,60,60,0.1); border: 1px solid rgba(255,60,60,0.25);
-            color: #f87171; font-size: 11px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-        }
-
-        .kolaul-row {
-            display: flex; align-items: center; gap: 13px; padding: 12px 16px;
-            cursor: pointer; transition: background 0.15s ease;
-        }
-        .kolaul-row:hover { background: rgba(255,255,255,0.03); }
-        .kolaul-row:active { background: var(--primary-dim); }
-        .kolaul-row-body { flex: 1; min-width: 0; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 12px; }
-        .kolaul-row-name { color: #fff; font-weight: 700; font-size: 14.5px; }
-        .kolaul-row-sub { color: rgba(255,255,255,0.4); font-size: 12.5px; margin-top: 2px; }
-
-        /* File preview bar removed — text-only chat */
-
-        /* Input bar — redesigned: floating glass pill composer */
-        #kola-chat-inputbar {
-            display: flex; align-items: flex-end; gap: 8px;
-            padding: 10px 12px 16px;
-            background: rgba(10,10,10,0.96); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-            border-top: 1px solid #333333;
-            flex-shrink: 0;
-        }
-        #kola-chat-input {
-            flex: 1;
-            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 24px; padding: 12px 17px;
-            color: #FFFFFF; font-size: 14.5px;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            outline: none; resize: none; max-height: 120px;
-            overflow-y: auto; scrollbar-width: none; line-height: 1.5;
-            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
-        }
-        #kola-chat-input:focus { border-color: var(--primary); background: rgba(255,255,255,0.06); box-shadow: 0 0 0 3px rgba(255,255,255,0.1); }
-        #kola-chat-input::placeholder { color: rgba(255,255,255,0.28); }
-        #kola-chat-send-btn {
-            width: 46px; height: 46px; min-width: 46px; border-radius: 50%;
-            background: linear-gradient(135deg,var(--primary),#CCCCCC);
-            border: none; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; flex-shrink: 0; transition: 0.18s cubic-bezier(.4,0,.2,1);
-            box-shadow: 0 4px 16px rgba(255,255,255,0.4);
-        }
-        #kola-chat-send-btn:active { transform: scale(0.88) rotate(-6deg); }
-        #kola-chat-send-btn:hover  { box-shadow: 0 6px 22px rgba(255,255,255,0.6); transform: translateY(-1px); }
-
-        /* ── Swipe-to-reply (new: drag any bubble right to quote-reply, WhatsApp-style) ── */
-        .kola-msg-row-chat { position: relative; }
-        .kola-msg-row-chat .kola-swipe-reply-icon {
-            position: absolute; left: 6px; top: 50%; transform: translateY(-50%) scale(0.5);
-            width: 30px; height: 30px; border-radius: 50%;
-            background: rgba(255,255,255,0.14); color: var(--primary);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 13px; opacity: 0; transition: opacity .12s, transform .12s; pointer-events: none;
-        }
-        .kola-msg-row-chat.kola-swipe-armed .kola-swipe-reply-icon { opacity: 1; transform: translateY(-50%) scale(1); }
-        .kola-msg-row-chat.recv .kola-swipe-reply-icon { left: 4px; }
-
-        /* Empty state */
-        #kola-chat-empty {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; flex: 1; padding: 40px 20px;
-            color: #CCCCCC; text-align: center;
-        }
-        #kola-chat-empty .empty-icon { font-size: 52px; margin-bottom: 14px; }
-        #kola-chat-empty h3 { font-size: 16px; font-weight: 800; color: #CCCCCC; margin-bottom: 8px; }
-        #kola-chat-empty p  { font-size: 13px; color: #CCCCCC; line-height: 1.6; }
-
-        /* Admin panel inline chat (replaces the old prompt) */
-        #admin-chat-modal {
-            position: fixed; inset: 0; z-index: 10001;
-            background: #000000;
-            display: none; flex-direction: column;
-        }
-        #admin-chat-modal.open { display: flex; }
-
-        /* Legacy ids kept alive for backward compat */
-        #dev-chat-panel    { display: none !important; }
-        #dev-chat-overlay  { display: none !important; }
-
-        /* AI message bubbles — ChatGPT/black style */
-        .kola-msg-ai {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            animation: fadeSlideIn 0.4s ease-out;
-            padding: 4px 0;
-        }
-        .kola-msg-user {
-            display: flex;
-            justify-content: flex-end;
-            animation: fadeSlideIn 0.3s ease-out;
-            padding: 4px 0;
-        }
-        .kola-bubble-ai {
-            max-width: 92%;
-            background: transparent;
-            border: none;
-            border-left: 2px solid rgba(255,255,255,0.35);
-            border-radius: 0;
-            padding: 2px 0 2px 14px;
-            color: #FFFFFF;
-            font-size: 15px;
-            line-height: 1.75;
-            box-shadow: none;
-        }
-        /* AI-shared clickable links — rendered as a small pill/button so they
-           read clearly as tappable actions, not just colored text. */
-        .kola-ai-link {
-            display: inline-flex;
-            align-items: center;
-            background: rgba(255,255,255,0.14);
-            border: 1px solid rgba(255,255,255,0.4);
-            color: #CCCCCC;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 13px;
-            padding: 5px 12px;
-            border-radius: 100px;
-            margin: 3px 2px;
-            word-break: break-all;
-            transition: 0.2s;
-        }
-        .kola-ai-link:hover, .kola-ai-link:active {
-            background: rgba(255,255,255,0.28);
-            border-color: rgba(255,255,255,0.7);
-        }
-        .kola-bubble-ai-text {
-            color: #FFFFFF;
-            font-size: 15px;
-            line-height: 1.75;
-        }
-        /* Action icons row below AI message */
-        .kola-ai-actions {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-        .kola-ai-action-btn {
-            width: 34px; height: 34px;
-            border-radius: 50%;
-            background: transparent;
-            border: none;
-            color: rgba(255,255,255,0.45);
-            font-size: 15px;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: all 0.18s;
-            flex-shrink: 0;
-        }
-        .kola-ai-action-btn:hover {
-            background: rgba(255,255,255,0.08);
-            color: #fff;
-        }
-        .kola-ai-action-btn.active {
-            color: #CCCCCC;
-        }
-        .kola-ai-action-btn.kola-speaking-icon {
-            color: #f87171;
-            animation: kolaPulseIcon 1.4s infinite;
-        }
-        @keyframes kolaPulseIcon {
-            0%,100% { opacity:1; } 50% { opacity:0.4; }
-        }
-        .kola-bubble-user {
-            max-width: 78%;
-            background: #241f30;
-            border: 1px solid rgba(255,255,255,0.18);
-            border-radius: 20px 20px 4px 20px;
-            padding: 12px 16px;
-            color: #fff;
-            font-size: 15px;
-            line-height: 1.6;
-            box-shadow: none;
-        }
-        .kola-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            overflow: hidden;
-            flex-shrink: 0;
-            border: none;
-            background: #444;
-            margin-top: 2px;
-        }
-        .kola-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
-        .kola-typing {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            padding: 8px 0;
-        }
-        .kola-dot {
-            width: 7px; height: 7px;
-            border-radius: 50%;
-            background: linear-gradient(135deg,#CCCCCC,#FFFFFF);
-            animation: kolaDot 1.2s ease-in-out infinite;
-        }
-        .kola-dot:nth-child(2) { animation-delay: 0.2s; }
-        .kola-dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes kolaDot {
-            0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
-            40% { transform: scale(1.1); opacity: 1; }
-        }
-        #kola-ai-input::placeholder { color: rgba(255,255,255,0.3); }
-        #kola-input-wrap:focus-within {
-            border-color: rgba(255,255,255,0.5) !important;
-            box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
-        }
-
-        /* ── Typewriter cursor ── */
-        .kola-typewriter-cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1em;
-            background: #CCCCCC;
-            margin-left: 2px;
-            vertical-align: text-bottom;
-            border-radius: 1px;
-            animation: kolaBlink 0.7s step-end infinite;
-        }
-        @keyframes kolaBlink {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: 0; }
-        }
-
-        /* Mic pulse animation when listening */
-        @keyframes kolaMicPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(255,60,60,0.5); }
-            50%       { box-shadow: 0 0 0 8px rgba(255,60,60,0); }
-        }
-        #kola-mic-btn.listening {
-            animation: kolaMicPulse 1s ease-in-out infinite;
-        }
-
-        /* ── AI-only bottom nav (shown only on AI page) ── */
-        #ai-bottom-nav {
-            display: none;
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            z-index: 600;
-            background: rgba(10,10,10,0.97);
-            border-top: 1px solid #333333;
-            backdrop-filter: blur(24px);
-            height: 64px;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            gap: 12px;
-        }
-        #ai-bottom-nav.ai-nav-visible { display: flex; }
-        .ai-nav-chat-btn {
-            flex: 1;
-            height: 42px;
-            border-radius: 14px;
-            background: linear-gradient(135deg,#FFFFFF,#FFFFFF);
-            border: none;
-            color: #000000;
-            font-weight: 900;
-            font-size: 12px;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 4px 20px rgba(255,255,255,0.4);
-            transition: all 0.2s;
-        }
-        .ai-nav-chat-btn:active { transform: scale(0.97); }
-        .ai-nav-back-btn {
-            width: 48px;
-            height: 42px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.14);
-            color: rgba(255,255,255,0.75);
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        .ai-nav-back-btn:active { transform: scale(0.93); }
-        .ai-nav-back-btn:hover { border-color: rgba(255,255,255,0.3); color: #fff; background: rgba(255,255,255,0.1); }
-
-        /* ── VOICE MESSAGE STYLES ── */
-        .kola-voice-bubble {
-            display: flex; align-items: center; gap: 10px;
-            padding: 8px 12px; min-width: 180px;
-        }
-        .kola-voice-play {
-            width: 34px; height: 34px; border-radius: 50%;
-            background: rgba(255,255,255,0.2); border: none;
-            color: #FFFFFF; font-size: 14px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; transition: 0.2s;
-        }
-        .kola-voice-play:hover { background: rgba(255,255,255,0.35); }
-        .kola-voice-waveform {
-            flex: 1; height: 28px; display: flex; align-items: center;
-            gap: 2px; overflow: hidden;
-        }
-        .kola-voice-bar {
-            width: 3px; border-radius: 2px; background: rgba(255,255,255,0.5);
-            flex-shrink: 0;
-        }
-        .kola-voice-dur {
-            font-size: 11px; color: rgba(255,255,255,0.4);
-            font-family: 'Orbitron', monospace; flex-shrink: 0;
-        }
-        /* Recording UI bar */
-        #kola-voice-recording-bar, #acm-voice-recording-bar {
-            display: none; align-items: center; gap: 10px;
-            padding: 10px 14px;
-            background: rgba(239,68,68,0.08);
-            border-top: 1px solid rgba(239,68,68,0.2);
-            flex-shrink: 0;
-        }
-        .kola-rec-pulse {
-            width: 10px; height: 10px; border-radius: 50%;
-            background: #ef4444; flex-shrink: 0;
-            animation: recPulse 1s ease-in-out infinite;
-        }
-        @keyframes recPulse {
-            0%,100% { opacity:1; transform:scale(1); box-shadow:0 0 0 0 rgba(239,68,68,0.5); }
-            50%      { opacity:0.6; transform:scale(0.85); box-shadow:0 0 0 6px rgba(239,68,68,0); }
-        }
-        .kola-rec-timer {
-            font-family: 'Orbitron', monospace; font-size: 13px;
-            color: #ef4444; font-weight: 700; flex: 1;
-        }
-        .kola-rec-cancel {
-            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-            color: #CCCCCC; font-size: 11px; font-weight: 700;
-            padding: 6px 12px; border-radius: 10px; cursor: pointer; transition: 0.2s;
-        }
-        .kola-rec-cancel:hover { background: rgba(255,60,60,0.15); color: #f87171; }
-        .kola-rec-send {
-            background: linear-gradient(135deg,#FFFFFF,#CCCCCC); border: none;
-            color: #fff; font-size: 11px; font-weight: 700;
-            padding: 6px 14px; border-radius: 10px; cursor: pointer; transition: 0.2s;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .kola-rec-send:hover { filter: brightness(1.15); }
-
-        /* ── Kola AI logo avatar (uses real logo) ── */
-        .kola-logo-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 9px;
-            overflow: hidden;
-            flex-shrink: 0;
-            border: 1px solid rgba(255,255,255,0.4);
-            background: linear-gradient(135deg,#FFFFFF,#FFFFFF);
-        }
-        .kola-logo-avatar img {
-            width: 100%; height: 100%;
-            object-fit: cover;
-        }
-        /* Notification Page Cards */
-        .notif-page-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 20px;
-            overflow: hidden;
-            transition: all 0.25s;
-        }
-        .notif-page-card:hover {
-            border-color: rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.06);
-            transform: translateY(-2px);
-        }
-
-        /* ═══════════════════════════════════════
-           QUIZ SYSTEM STYLES
-        ═══════════════════════════════════════ */
-        .quiz-option { width:100%; padding:14px 18px; border-radius:16px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.02); color:#FFFFFF; font-size:13px; font-weight:700; text-align:left; cursor:pointer; transition:all 0.22s cubic-bezier(0.4,0,0.2,1); position:relative; overflow:hidden; }
-        .quiz-option:hover:not(:disabled) { border-color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.06); transform:translateX(4px); }
-        .quiz-option.correct  { border-color:#CCCCCC!important; background:rgba(255,255,255,0.12)!important; color:#CCCCCC!important; }
-        .quiz-option.wrong    { border-color:#ef4444!important; background:rgba(239,68,68,0.08)!important; color:#fca5a5!important; }
-        .quiz-option.reveal-correct { border-color:#CCCCCC!important; background:rgba(255,255,255,0.06)!important; }
-        .quiz-option:disabled { cursor:default; }
-        .quiz-prog-track { height:5px; border-radius:3px; background:rgba(255,255,255,0.06); overflow:hidden; margin-bottom:20px; }
-        .quiz-prog-fill  { height:100%; border-radius:3px; background:linear-gradient(90deg,#FFFFFF,var(--primary),#FFFFFF); transition:width 0.5s cubic-bezier(0.4,0,0.2,1); }
-        .quiz-score-ring { width:120px; height:120px; border-radius:50%; border:4px solid rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center; background:radial-gradient(circle,rgba(255,255,255,0.08),transparent 70%); margin:0 auto 16px; position:relative; }
-        .quiz-score-ring svg { position:absolute; top:-4px; left:-4px; width:128px; height:128px; transform:rotate(-90deg); }
-        .quiz-score-ring circle { fill:none; stroke-width:4; stroke-linecap:round; transition:stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1); }
-        .admin-q-card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:16px 18px; margin-bottom:10px; transition:0.2s; }
-        .admin-q-card:hover { border-color:rgba(255,255,255,0.2); background:rgba(255,255,255,0.04); }
-        .quiz-explanation { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.2); border-radius:14px; padding:12px 16px; font-size:12px; color:#CCCCCC; margin-top:12px; display:none; }
-        .quiz-explanation.wrong-exp { background:rgba(239,68,68,0.06); border-color:rgba(239,68,68,0.2); color:#fca5a5; }
-        .quiz-tag { display:inline-block; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:100px; padding:3px 10px; font-size:10px; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.5px; }
-        .quiz-num { width:28px; height:28px; border-radius:9px; background:linear-gradient(135deg,#FFFFFF,var(--primary)); display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; color:#000; flex-shrink:0; }
-        .quiz-input { width:100%; padding:12px 16px; border-radius:12px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); color:#FFFFFF; font-size:13px; outline:none; transition:0.2s; font-family:'Plus Jakarta Sans',sans-serif; }
-        .quiz-input:focus { border-color:rgba(255,255,255,0.4); background:rgba(255,255,255,0.05); }
-        .quiz-option-input { flex:1; padding:10px 14px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); color:#FFFFFF; font-size:12px; outline:none; transition:0.2s; font-family:'Plus Jakarta Sans',sans-serif; }
-        .quiz-option-input:focus { border-color:rgba(255,255,255,0.35); }
-        .correct-toggle { width:28px; height:28px; border-radius:8px; border:1.5px solid rgba(255,255,255,0.12); background:transparent; color:rgba(204,204,204,1); cursor:pointer; font-size:11px; display:flex; align-items:center; justify-content:center; transition:0.2s; flex-shrink:0; }
-        .correct-toggle.selected { background:rgba(255,255,255,0.15); border-color:#CCCCCC; color:#CCCCCC; }
-        .quiz-hist-card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:14px 16px; transition:0.2s; margin-bottom:8px; }
-        .quiz-hist-card:hover { border-color:rgba(255,255,255,0.2); }
-
-        /* ── EXPLORE OPTIONS ANIMATION ── */
-        @keyframes exploreCardIn {
-            from { opacity:0; transform:translateY(30px) scale(0.85); }
-            to   { opacity:1; transform:translateY(0) scale(1); }
-        }
-
-        /* ════ MOBILE BOTTOM NAV ════ */
-        #bottom-nav {
-            display: flex !important;
-        }
-        .bnav-btn {
-            color: rgba(204,204,204,1);
-            transition: all 0.2s;
-        }
-        .bnav-btn.active {
-            color: var(--primary);
-        }
-        .bnav-btn.active i {
-            filter: drop-shadow(0 0 6px rgba(255,255,255,0.7));
-        }
-        /* add bottom padding to main content so bottom nav doesn't cover it */
-        .container { padding-bottom: 80px !important; }
-
-        /* ════ ENHANCED CARD GLOW ANIMATIONS ════ */
-        @keyframes cardFloat {
-            0%,100% { transform: translateY(0px); }
-            50%      { transform: translateY(-4px); }
-        }
-        @keyframes neonPulse {
-            0%,100% { box-shadow: 0 0 8px rgba(255,255,255,0.2), 0 4px 20px rgba(0,0,0,0.3); }
-            50%      { box-shadow: 0 0 20px rgba(255,255,255,0.4), 0 8px 30px rgba(0,0,0,0.4); }
-        }
-        .explore-option-card:hover {
-            transform: translateX(6px) !important;
-            box-shadow: 0 0 20px rgba(255,255,255,0.15), 0 8px 30px rgba(0,0,0,0.4) !important;
-        }
-
-        /* ════ ENHANCED BUTTON RIPPLE ════ */
-        .btn-action, .btn-blue {
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-action::before, .btn-blue::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at center, rgba(255,255,255,0.15) 0%, transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .btn-action:hover::before, .btn-blue:hover::before { opacity: 1; }
-    </style>
-
-</head>
-<body>
-
-<!-- ══════════════════════════════════════════
-     ADMIN — USER MESSAGES (Reply to students)
-     Copied verbatim from the main site's admin panel.
-══════════════════════════════════════════ -->
-    <!-- ══════════════════════════════════════════
-         ADMIN — USER MESSAGES (Reply to students)
-    ══════════════════════════════════════════ -->
-    <div id="step-admin-dev-chat" class="view-step view-active glass-ui p-6" style="min-height:100vh;">
-        <div class="flex items-center justify-between mb-6">
-            <div></div><!-- no outer dashboard to go back to in this standalone tool -->
-            <h2 class="text-xl font-black orbitron italic" style="background:linear-gradient(135deg,#FFFFFF,#CCCCCC);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
-                💬 <span id="admin-devchat-channel-label">User Messages</span>
-            </h2>
-            <button id="admin-devchat-refresh-btn" onclick="loadAdminDevChats()" style="display:none;width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#FFFFFF;font-size:13px;">
-                <i class="fa-solid fa-rotate-right"></i>
-            </button>
-        </div>
-
-        <!-- Global setting: controls whether every user's keyboard auto-closes
-             after tapping Send. Stored in Firestore so it applies to every
-             device/phone that opens the site, not just this admin session. -->
-        <div class="glass-ui p-4 rounded-2xl mb-5" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-            <div>
-                <div class="text-white font-black text-xs mb-1">⌨️ Auto-close keyboard after Send</div>
-                <div class="text-[10px] text-gray-500">Applies to every phone using the site. Off = keyboard stays open after sending a message.</div>
-            </div>
-            <label style="position:relative;display:inline-block;width:46px;height:26px;flex-shrink:0;">
-                <input type="checkbox" id="admin-autoclose-kb-toggle" checked onchange="adminSetAutoCloseKeyboard(this.checked)" style="opacity:0;width:0;height:0;">
-                <span id="admin-autoclose-kb-track" style="position:absolute;cursor:pointer;inset:0;background:var(--primary);border-radius:26px;transition:0.2s;"></span>
-                <span id="admin-autoclose-kb-knob" style="position:absolute;height:20px;width:20px;left:23px;top:3px;background:#000000;border-radius:50%;transition:0.2s;"></span>
-            </label>
-        </div>
-
-        <!-- Channel picker: shown first — two separately password-protected chat lines,
-             kept fully apart so Developer and Khufia Agent messages never mix. -->
-        <div id="admin-devchat-picker" style="display:flex;flex-direction:column;gap:14px;">
-            <div class="card-hover glass-ui p-6 text-center cursor-pointer rounded-2xl" onclick="selectAdminChatChannel('developer')">
-                <div style="font-size:34px;margin-bottom:8px;">💻</div>
-                <h3 class="text-white font-black text-sm mb-1">Developer — Alok Singh</h3>
-                <p class="text-[10px] text-gray-500">Password protected</p>
-            </div>
-            <div class="card-hover glass-ui p-6 text-center cursor-pointer rounded-2xl" onclick="selectAdminChatChannel('khufia')">
-                <div style="font-size:34px;margin-bottom:8px;">🕵️</div>
-                <h3 class="text-white font-black text-sm mb-1">Khufia Agent</h3>
-                <p class="text-[10px] text-gray-500">Password protected</p>
-            </div>
-        </div>
-
-        <!-- User list for the selected channel (hidden until a channel is unlocked) -->
-        <div id="admin-devchat-listarea" style="display:none;">
-            <button onclick="adminChatChannelBack()" style="margin-bottom:12px;background:none;border:none;color:#FFFFFF;font-size:11px;font-weight:700;cursor:pointer;">
-                <i class="fa-solid fa-arrow-left"></i> Switch chat
-            </button>
-            <div id="admin-devchats-status" style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:8px;display:none;">
-                Live — updates instantly as new messages arrive.
-            </div>
-            <div id="admin-devchats-list" style="display:flex;flex-direction:column;gap:10px;max-height:70vh;overflow-y:auto;">
-                <div style="text-align:center;padding:40px;color:rgba(255,255,255,0.2);font-size:13px;">
-                    <i class="fa-solid fa-comments" style="font-size:32px;display:block;margin-bottom:12px;"></i>Loading messages…
-                </div>
-            </div>
-        </div>
-    </div><!-- end step-admin-dev-chat -->
-
-
-<!-- Hidden/unopened — kept only so the shared chat engine below finds every element id it expects. -->
-<div style="position:fixed;left:-9999px;top:-9999px;width:0;height:0;overflow:hidden;">
-<div id="kola-chat-screen">
-
-    <!-- Top bar -->
-    <div id="kola-chat-topbar">
-        <button class="kola-topbar-back" onclick="kolaChat.close()">
-            <i class="fa-solid fa-arrow-left"></i>
-        </button>
-        <div class="kola-topbar-avatar" id="kola-topbar-avatar">
-            <img id="kola-topbar-avatar-img" src="https://drive.google.com/thumbnail?id=1X_k6gMNuOkHk-GM5o8LDzIdNJUPEIM26&sz=w200" onerror="this.style.display='none';this.parentNode.textContent='A'">
-            <span class="kola-presence-dot"></span>
-        </div>
-        <div class="kola-topbar-info">
-            <div class="kola-topbar-name" id="kola-chat-title">Alok Singh 👨‍💻</div>
-            <div class="kola-topbar-status" id="kola-admin-status">● Support Online</div>
-        </div>
-        <div style="font-size:10px;color:#CCCCCC;text-align:right;line-height:1.5;">
-            Kola Bro<br>Support
-        </div>
-        <!-- Admin shortcut: password → straight into chat management, no menu-hunting -->
-        <button onclick="promptAdminFromChat()" title="Admin" style="width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.35);font-size:11px;flex-shrink:0;">
-            <i class="fa-solid fa-user-shield"></i>
-        </button>
-        <div style="position:relative;flex-shrink:0;">
-            <button onclick="kolaMenuToggle()" title="Menu" style="width:32px;height:32px;border-radius:50%;background:transparent;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.6);font-size:16px;">
-                <i class="fa-solid fa-ellipsis-vertical"></i>
-            </button>
-            <div id="kola-chat-menu" style="display:none;position:absolute;top:38px;right:0;background:#0A0A0A;border:1px solid rgba(255,255,255,0.2);border-radius:14px;min-width:200px;box-shadow:0 10px 30px rgba(0,0,0,0.5);z-index:50;overflow:hidden;">
-                <div class="kola-menu-item" onclick="kolaChatMenuAction('search')">🔍 Search in chat</div>
-                <div class="kola-menu-item" onclick="kolaChatMenuAction('media')">🖼️ Media, links, and docs</div>
-                <div class="kola-menu-item" onclick="kolaChatMenuAction('mute')">🔕 Mute notifications</div>
-                <div class="kola-menu-item" onclick="kolaChatMenuAction('theme')">🎨 Chat theme</div>
-                <div class="kola-menu-item" onclick="kolaChatMenuAction('clear')" style="color:#f87171;">🗑️ Clear chat</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Selection-mode toolbar (WhatsApp-style: appears when messages are long-pressed) -->
-    <div id="kola-select-bar" style="display:none;align-items:center;gap:14px;padding:0 14px;height:56px;background:#000000;border-bottom:1px solid rgba(255,255,255,0.15);flex-shrink:0;">
-        <button onclick="kolaSelect.exit()" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;"><i class="fa-solid fa-arrow-left"></i></button>
-        <span id="kola-select-count" style="color:#fff;font-weight:700;font-size:15px;">1</span>
-        <div style="flex:1;"></div>
-        <button onclick="kolaSelect.reply()" title="Reply" style="background:none;border:none;color:rgba(255,255,255,0.8);font-size:16px;cursor:pointer;"><i class="fa-solid fa-reply"></i></button>
-        <button onclick="kolaSelect.star()" title="Star" style="background:none;border:none;color:rgba(255,255,255,0.8);font-size:16px;cursor:pointer;"><i class="fa-solid fa-star"></i></button>
-        <button onclick="kolaSelect.deleteSelected()" title="Delete" style="background:none;border:none;color:rgba(255,255,255,0.8);font-size:16px;cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
-        <button onclick="kolaSelect.copy()" title="Copy" style="background:none;border:none;color:rgba(255,255,255,0.8);font-size:16px;cursor:pointer;"><i class="fa-regular fa-copy"></i></button>
-        <button onclick="kolaSelect.forward()" title="Forward" style="background:none;border:none;color:rgba(255,255,255,0.8);font-size:16px;cursor:pointer;"><i class="fa-solid fa-share"></i></button>
-    </div>
-
-    <!-- Messages -->
-    <div id="kola-chat-messages">
-        <!-- Populated by JS -->
-        <div id="kola-chat-empty">
-            <div class="empty-icon">💬</div>
-            <h3>Start a Conversation</h3>
-            <p>Send a message to get help from the Kola Bro team. We reply as soon as possible!</p>
-        </div>
-    </div>
-
-    <!-- Typing indicator -->
-    <div id="kola-typing-indicator">
-        <div class="kola-recv-avatar" style="width:26px;height:26px;font-size:10px;">A</div>
-        <div style="background:#0A0A0A;border:1px solid #1A1A1A;border-radius:14px;padding:8px 14px;">
-            <div class="kola-typing-dots">
-                <div class="kola-typing-dot"></div>
-                <div class="kola-typing-dot"></div>
-                <div class="kola-typing-dot"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Image Preview Bar (shown when 1 or more images selected — multi-image sharing) -->
-    <div id="kola-img-preview-bar" style="display:none;flex-direction:column;gap:6px;padding:10px 12px;background:#000000;border-top:1px solid rgba(255,255,255,0.1);">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-            <p id="kola-img-preview-status" style="font-size:11px;color:rgba(255,255,255,0.9);font-weight:800;margin:0;">Ready to send</p>
-            <button onclick="kolaChat.clearImage()" style="width:24px;height:24px;border-radius:7px;background:rgba(255,60,60,0.12);border:1px solid rgba(255,60,60,0.25);color:#f87171;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        <div id="kola-img-preview-grid" class="kola-img-preview-grid"></div>
-    </div>
-
-    <!-- Voice Recording Bar (student) -->
-    <div id="kola-voice-recording-bar">
-        <div class="kola-rec-pulse"></div>
-        <span class="kola-rec-timer" id="kola-rec-timer">0:00</span>
-        <button class="kola-rec-cancel" onclick="kolaVoice.cancel()"><i class="fa-solid fa-xmark mr-1"></i>Cancel</button>
-        <button class="kola-rec-send" onclick="kolaVoice.stop()"><i class="fa-solid fa-paper-plane"></i> Send</button>
-    </div>
-
-    <!-- Hidden file input — "multiple" enables sharing several photos in one message -->
-    <input type="file" id="kola-chat-img-input" accept="image/jpeg,image/png,image/gif" multiple style="display:none;" onchange="kolaChat.onImageSelected(this)">
-
-    <!-- Reply preview bar (shown when replying to a specific message) -->
-    <div id="kola-reply-preview" class="kola-reply-preview-bar">
-        <div class="krp-text"><span class="krp-label">Replying</span><span id="kola-reply-preview-text"></span></div>
-        <button onclick="kolaReply.cancel('student')" title="Cancel reply"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-
-    <!-- Input bar -->
-    <div id="kola-chat-inputbar">
-        <!-- Image attach button -->
-        <button onclick="document.getElementById('kola-chat-img-input').click()" title="Send Image"
-            style="width:40px;height:40px;min-width:40px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#FFFFFF;font-size:16px;flex-shrink:0;transition:0.2s;"
-            onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
-            <i class="fa-solid fa-image"></i>
-        </button>
-        <textarea id="kola-chat-input"
-            placeholder="Message support…"
-            rows="1"
-            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';window.kolaChatOnType();"
-            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();kolaChat.send();}">
-        </textarea>
-        <button id="kola-chat-send-btn" onclick="kolaChat.send()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#000"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-        </button>
-        <!-- Document/file attach button (PDF, DOC, PPT, ZIP, etc.) -->
-        <button onclick="document.getElementById('kola-chat-file-input').click()" title="Send File"
-            style="width:40px;height:40px;min-width:40px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#FFFFFF;font-size:15px;flex-shrink:0;transition:0.2s;"
-            onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
-            <i class="fa-solid fa-paperclip"></i>
-        </button>
-        <input type="file" id="kola-chat-file-input" accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.txt,.xlsx,.xls" style="display:none;" onchange="kolaChat.onFileSelected(this)">
-        <!-- Voice message button -->
-        <button id="kola-voice-mic-btn" onclick="kolaVoice.start('student')" title="Send Voice Message"
-            style="width:44px;height:44px;min-width:44px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#FFFFFF;font-size:17px;flex-shrink:0;transition:0.2s;"
-            onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
-            <i class="fa-solid fa-microphone"></i>
-        </button>
-    </div>
-</div>
-
-</div>
-
-<!-- ════════════════════════════════════════════════════════
-     ADMIN FULL-SCREEN CHAT MODAL (per-user)
-════════════════════════════════════════════════════════ -->
-<div id="admin-chat-modal">
-    <div id="admin-chat-topbar" style="display:flex;align-items:center;gap:12px;padding:0 14px;height:62px;background:#000000;border-bottom:1px solid rgba(255,255,255,0.2);flex-shrink:0;">
-        <button onclick="adminChat.close()" style="width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,0.06);border:none;color:#aaa;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-            <i class="fa-solid fa-arrow-left"></i>
-        </button>
-        <div id="acm-avatar" style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#FFFFFF,#CCCCCC);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#000000;flex-shrink:0;"></div>
-        <div style="flex:1;min-width:0;">
-            <div id="acm-name" style="font-weight:800;font-size:15px;color:#FFFFFF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-            <div id="acm-uid"  style="font-size:10px;color:#CCCCCC;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-        </div>
-    </div>
-    <div id="acm-messages" style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px;background:#000000;background-image:url('https://drive.google.com/thumbnail?id=1A_xjGYUfggU9AWjYTgaBk3j02Ipb8k7P&sz=w1200');background-size:cover;background-position:center;scrollbar-width:thin;scrollbar-color:#1A1A1A transparent;"></div>
-    <!-- Typing -->
-    <div id="acm-typing" style="display:none;padding:4px 14px 8px;background:#000000;">
-        <div style="display:inline-flex;align-items:center;gap:6px;background:#0A0A0A;border:1px solid #1A1A1A;border-radius:12px;padding:6px 12px;">
-            <div style="display:flex;gap:3px;"><div style="width:6px;height:6px;border-radius:50%;background:#333333;animation:typingBounce 1.2s ease-in-out infinite;"></div><div style="width:6px;height:6px;border-radius:50%;background:#333333;animation:typingBounce 1.2s ease-in-out 0.2s infinite;"></div><div style="width:6px;height:6px;border-radius:50%;background:#333333;animation:typingBounce 1.2s ease-in-out 0.4s infinite;"></div></div>
-            <span style="font-size:11px;color:#555;">Student typing…</span>
-        </div>
-    </div>
-    <!-- Admin image preview bar (multi-image sharing) -->
-    <div id="acm-img-preview-bar" style="display:none;flex-direction:column;gap:6px;padding:10px 12px;background:#000000;border-top:1px solid rgba(255,255,255,0.1);">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-            <p id="acm-img-preview-status" style="font-size:11px;color:rgba(255,255,255,0.9);font-weight:800;margin:0;">Ready to send</p>
-            <button onclick="adminChat.clearImage()" style="width:24px;height:24px;border-radius:7px;background:rgba(255,60,60,0.12);border:1px solid rgba(255,60,60,0.25);color:#f87171;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        <div id="acm-img-preview-grid" class="kola-img-preview-grid"></div>
-    </div>
-    <input type="file" id="acm-img-input" accept="image/jpeg,image/png,image/gif" multiple style="display:none;" onchange="adminChat.onImageSelected(this)">
-    <!-- Reply preview bar (admin) -->
-    <div id="acm-reply-preview" class="kola-reply-preview-bar">
-        <div class="krp-text"><span class="krp-label">Replying</span><span id="acm-reply-preview-text"></span></div>
-        <button onclick="kolaReply.cancel('admin')" title="Cancel reply"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <!-- Voice Recording Bar (admin) -->
-    <div id="acm-voice-recording-bar">
-        <div class="kola-rec-pulse"></div>
-        <span class="kola-rec-timer" id="acm-rec-timer">0:00</span>
-        <button class="kola-rec-cancel" onclick="kolaVoice.cancel()"><i class="fa-solid fa-xmark mr-1"></i>Cancel</button>
-        <button class="kola-rec-send" onclick="kolaVoice.stop()"><i class="fa-solid fa-paper-plane"></i> Send</button>
-    </div>
-    <div id="acm-inputbar" style="display:flex;align-items:flex-end;gap:8px;padding:10px 12px 16px;background:#000000;border-top:1px solid rgba(255,255,255,0.12);flex-shrink:0;">
-        <!-- Image attach button for admin -->
-        <button onclick="document.getElementById('acm-img-input').click()" title="Send Image"
-            style="width:40px;height:40px;min-width:40px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#FFFFFF;font-size:16px;flex-shrink:0;transition:0.2s;"
-            onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
-            <i class="fa-solid fa-image"></i>
-        </button>
-        <!-- Document/file attach button for admin -->
-        <button onclick="document.getElementById('acm-file-input').click()" title="Send File"
-            style="width:40px;height:40px;min-width:40px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#FFFFFF;font-size:15px;flex-shrink:0;transition:0.2s;"
-            onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
-            <i class="fa-solid fa-paperclip"></i>
-        </button>
-        <input type="file" id="acm-file-input" accept=".pdf,.doc,.docx,.ppt,.pptx,.zip,.txt,.xlsx,.xls" style="display:none;" onchange="adminChat.onFileSelected(this)">
-        <textarea id="acm-input" placeholder="Reply to student…" rows="1"
-            style="flex:1;background:#0A0A0A;border:1px solid #333333;border-radius:24px;padding:11px 16px;color:#FFFFFF;font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;outline:none;resize:none;max-height:120px;overflow-y:auto;scrollbar-width:none;line-height:1.5;transition:border-color 0.2s;"
-            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';window.adminChatOnType();"
-            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();adminChat.send();}">
-        </textarea>
-        <button onclick="adminChat.send()" style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FFFFFF,#CCCCCC);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 3px 14px rgba(255,255,255,0.35);transition:0.2s;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
-        </button>
-        <!-- Voice message button (admin) -->
-        <button id="acm-voice-mic-btn" onclick="kolaVoice.start('admin')" title="Send Voice Message"
-            style="width:44px;height:44px;min-width:44px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#FFFFFF;font-size:17px;flex-shrink:0;transition:0.2s;"
-            onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
-            <i class="fa-solid fa-microphone"></i>
-        </button>
-    </div>
-</div>
-
-
-<!-- Kept for backward compatibility (hidden by CSS) -->
-<div id="dev-chat-overlay"></div>
-<div id="dev-chat-panel"></div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, onSnapshot, doc, deleteDoc, query, orderBy, limit, updateDoc, setDoc, getDoc, increment, where, arrayUnion, deleteField } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getStorage, ref, uploadBytesResumable, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAwKGhoQGjcTI1kHYuYlGGI_vGlojCgeOk",
-      authDomain: "kola26-70d76.firebaseapp.com",
-      projectId: "kola26-70d76",
-      storageBucket: "kola26-70d76.firebasestorage.app",
-      messagingSenderId: "27350698262",
-      appId: "1:27350698262:web:96b0f2fc0865db19252837"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-    window._kolaDB      = db;
-    window._kolaStorage = storage;
-
-    // ── Global "auto-close keyboard after Send" setting ──
-    // Lives in Firestore (settings/appConfig) so the admin's toggle applies
-    // instantly to every phone/device that has the site open, not just the
-    // admin's own session. Defaults to true (keyboard closes) until loaded.
-    window._kolaAutoCloseKeyboard = true;
-    try {
-        onSnapshot(doc(db, 'settings', 'appConfig'), (snap) => {
-            const data = snap.data() || {};
-            window._kolaAutoCloseKeyboard = data.autoCloseKeyboard !== false; // default true
-            const toggle = document.getElementById('admin-autoclose-kb-toggle');
-            const track  = document.getElementById('admin-autoclose-kb-track');
-            const knob   = document.getElementById('admin-autoclose-kb-knob');
-            if (toggle) toggle.checked = window._kolaAutoCloseKeyboard;
+  <!--                  <            if (toggle) toggle.checked = window._kolaAutoCloseKeyboard;
             if (track)  track.style.background = window._kolaAutoCloseKeyboard ? 'var(--primary)' : '#333333';
             if (knob)   knob.style.left = window._kolaAutoCloseKeyboard ? '23px' : '3px';
         });
@@ -2013,12 +45,7 @@
 <!-- ════════════════════════════════════════════════════════
      KOLA SUPPORT CHAT — COMPLETE JAVASCRIPT ENGINE
      (copied verbatim from the main site)
-════════════════════════════════════════════════════════ -->
-<script>
-'use strict';
-(function() {
-
-/* ════════════════════════════════════
+════════════════════════════════════════════════════════* ════════════════════════════════════
    HELPERS
 ════════════════════════════════════ */
 function waitForFirebase(cb, tries = 0) {
@@ -2043,324 +70,13 @@ function getUserName() {
     const s = getSession();
     return s.name || 'Student';
 }
-
-function esc(s) {
-    return (s||'').toString()
-        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-}
-
-// Auto-detects URLs in a message and turns them into safe, clickable links —
-// everything else still goes through esc() so nothing unsafe ever gets injected.
-function linkifyText(text) {
-    if (!text) return '';
-    const urlRegex = /((?:https?:\/\/|www\.)[^\s<]+)/gi;
-    let out = '', lastIndex = 0, m;
-    while ((m = urlRegex.exec(text)) !== null) {
-        out += esc(text.slice(lastIndex, m.index));
-        let url = m[0], trail = '';
-        // don't swallow trailing punctuation that's clearly not part of the URL
-        while (url.length && /[.,!?;:)\]]$/.test(url)) { trail = url.slice(-1) + trail; url = url.slice(0, -1); }
-        const href = /^https?:\/\//i.test(url) ? url : 'https://' + url;
-        out += `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="color:#7dd3fc;text-decoration:underline;word-break:break-all;">${esc(url)}</a>${esc(trail)}`;
-        lastIndex = m.index + m[0].length;
-    }
-    out += esc(text.slice(lastIndex));
-    return out;
-}
-
-// These helpers live inside this IIFE, so by default they're only visible to
-// code in this same script block. Several other features (gallery views,
-// doubt board, etc.) live in a separate <script type="module"> earlier in the
-// page and need to call these too — module scripts don't automatically see
-// into a classic script's function-local scope, so we explicitly publish
-// them on window here. (This is what was causing "getUserId is not defined".)
-window.getUserId    = getUserId;
-window.getUserName  = getUserName;
-window.getSession   = getSession;
-window.esc          = esc;
-window.waitForFirebase = waitForFirebase;
-
-/* ════════════════════════════════════════════════════════
-   MULTI-USER CHAT LIST + 1:1 PEER CHAT
-   Completely separate from the admin support-chat code above —
-   built additively so nothing already working (admin chat,
-   calling, selection mode) could be affected.
-════════════════════════════════════════════════════════ */
-const KOLA_SHARED_IMGBB_KEY = '6754d0321222e9f58c723a5081ecfc1f';
-let _kolaPeerListUnsub = null;
-let _kolaPeerChatUnsub = null;
-let _kolaPeerChatId = null;
-let _kolaPeerId = null;
-
-window.kolaUserList = {
-    open() {
-        document.getElementById('kola-userlist-screen').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        const badge = document.getElementById('kola-fab-badge');
-        if (badge) { badge.classList.remove('show'); badge.textContent = '0'; }
-
-        // Own avatar top-right
-        const own = document.getElementById('kolaul-own-avatar');
-        const savedPhoto = localStorage.getItem('kolaAvatarUrl') || '';
-        if (own) own.style.backgroundImage = savedPhoto ? `url('${savedPhoto}')` : '';
-
-        // Just the two chat options — no visitor list. This used to read every
-        // registered visitor from Firestore and show their names/photos here,
-        // which is exactly the "anyone can see who else uses the site" leak
-        // that was reported. Fixed by not reading that collection at all.
-        this._renderOptions();
-    },
-    close() {
-        document.getElementById('kola-userlist-screen').style.display = 'none';
-        document.body.style.overflow = '';
-    },
-    search() {
-        // No-op now that there's nothing to search — kept so any leftover
-        // references to kolaUserList.search() don't throw.
-    },
-    _renderOptions() {
-        const listEl = document.getElementById('kolaul-list');
-        if (!listEl) return;
-        listEl.innerHTML = `
-        <div class="kolaul-row" data-row-name="developer" onclick="kolaUserList.close(); kolaChat.open('developer');">
-            <div class="kola-topbar-avatar" style="width:52px;height:52px;font-size:22px;">
-                <span>💻</span>
-                <span class="kola-presence-dot"></span>
-            </div>
-            <div class="kolaul-row-body">
-                <div class="kolaul-row-name">Chat with Developer <i class="fa-solid fa-thumbtack" style="font-size:9px;color:var(--secondary);margin-left:4px;"></i></div>
-                <div class="kolaul-row-sub">Alok Singh — tap to chat</div>
-            </div>
-        </div>
-        <div class="kolaul-row" data-row-name="khufia" onclick="kolaUserList.close(); kolaChat.open('khufia');">
-            <div class="kola-topbar-avatar" style="width:52px;height:52px;font-size:22px;">
-                <img src="https://drive.google.com/thumbnail?id=1epBoCVzqK_tRuwFcp_SweJQ98W_WDbvM&sz=w200" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display='none';this.parentNode.innerHTML+='🕵️'">
-                <span class="kola-presence-dot"></span>
-            </div>
-            <div class="kolaul-row-body">
-                <div class="kolaul-row-name">Chat with Khufia Agent</div>
-                <div class="kolaul-row-sub">Tap to chat</div>
-            </div>
-        </div>`;
-    }
-};
-
-window.kolaPeerChat = {
-    open(peerId, peerName, peerPhoto) {
-        _kolaPeerId = peerId;
-        _kolaPeerChatId = [getUserId(), peerId].sort().join('_');
-        document.getElementById('kola-peerchat-screen').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        document.getElementById('kolapc-name').textContent = peerName || 'Student';
-        const avatarEl = document.getElementById('kolapc-avatar');
-        avatarEl.style.background = peerPhoto ? `url('${peerPhoto}') center/cover` : 'linear-gradient(135deg,var(--primary),#CCCCCC)';
-        avatarEl.textContent = peerPhoto ? '' : (peerName || '?').charAt(0).toUpperCase();
-        document.getElementById('kolapc-status').textContent = 'online';
-        this._listen();
-        setTimeout(() => document.getElementById('kolapc-input')?.focus(), 300);
-    },
-    close() {
-        document.getElementById('kola-peerchat-screen').style.display = 'none';
-        document.body.style.overflow = '';
-        if (_kolaPeerChatUnsub) { _kolaPeerChatUnsub(); _kolaPeerChatUnsub = null; }
-    },
-    _listen() {
-        const { collection, query, orderBy, onSnapshot } = window._fs;
-        if (_kolaPeerChatUnsub) _kolaPeerChatUnsub();
-        const q = query(collection(window._kolaDB, 'directChats', _kolaPeerChatId, 'messages'), orderBy('timestamp', 'asc'));
-        _kolaPeerChatUnsub = onSnapshot(q, (snap) => {
-            const box = document.getElementById('kolapc-messages');
-            const myId = getUserId();
-            let html = '';
-            snap.docs.forEach(d => {
-                const m = d.data();
-                const isSent = m.senderId === myId;
-                const img = m.imageUrl ? `<img src="${m.imageUrl}" style="max-width:220px;border-radius:12px;display:block;margin-top:4px;cursor:pointer;" onclick="window.open('${m.imageUrl}','_blank')">` : '';
-                html += `<div class="kola-msg-row-chat ${isSent ? 'sent' : 'recv'}">
-                    <div class="kola-bubble-chat ${isSent ? 'sent' : 'recv'}">
-                        ${m.text ? esc(m.text) : ''}${img}
-                        <div class="kola-bubble-time"><span>${fmtTime(m.timestamp)}</span></div>
-                    </div>
-                </div>`;
-            });
-            box.innerHTML = html;
-            box.scrollTop = box.scrollHeight;
-        }, (err) => {
-            console.error('[kolaPeerChat] Message listener failed:', err);
-            const box = document.getElementById('kolapc-messages');
-            if (box) box.innerHTML = `<div style="text-align:center;color:#f87171;font-size:12px;padding:20px;">Couldn't load messages: ${err.code || err.message}</div>`;
-        });
-    },
-    async send() {
-        const input = document.getElementById('kolapc-input');
-        const text = input.value.trim();
-        if (!text) return;
-        input.value = '';
-        if (window._kolaAutoCloseKeyboard !== false) input.blur();
-        try {
-            await this._push({ text });
-        } catch(e) {
-            console.error('[kolaPeerChat] Send failed:', e);
-            alert('Message could not be sent: ' + (e.code || e.message) + '\n\n(This is almost always Firestore security rules blocking the "directChats" collection — ask your developer to check them.)');
-            input.value = text; // give the text back so it's not lost
-        }
-    },
-    async sendImage(evt) {
-        const file = evt.target.files?.[0];
-        if (!file) return;
-        evt.target.value = '';
-        try {
-            const compressed = await kolaCompressImageForUpload(file);
-            const fd = new FormData();
-            fd.append('image', compressed);
-            const res = await fetch(`https://api.imgbb.com/1/upload?key=${KOLA_SHARED_IMGBB_KEY}`, { method:'POST', body: fd });
-            const json = await res.json();
-            if (!json.success) throw new Error('Upload failed');
-            await this._push({ text: '', imageUrl: json.data.url });
-        } catch(e) { alert('Could not send image: ' + e.message); }
-    },
-    async _push(payload) {
-        const { collection, addDoc, doc, setDoc, serverTimestamp } = window._fs;
-        const myId = getUserId();
-        await addDoc(collection(window._kolaDB, 'directChats', _kolaPeerChatId, 'messages'), {
-            senderId: myId,
-            timestamp: new Date().toISOString(),
-            ...payload
-        });
-        // Keep a parent doc so this chat could show a preview later.
-        try {
-            await setDoc(doc(window._kolaDB, 'directChats', _kolaPeerChatId), {
-                participants: [myId, _kolaPeerId],
-                lastMessage: payload.text || '📷 Photo',
-                updatedAt: new Date().toISOString()
-            });
-        } catch(e) {}
-    }
-};
-
-/* ════════════════════════════════════════════════════════
-   STORIES — anyone can post a photo/video story, visible to
-   every visitor for 24h. Photos → ImgBB, Videos → Cloudinary
-   (same keys already used elsewhere in this app).
-════════════════════════════════════════════════════════ */
-const STORY_IMGBB_KEY = '6754d0321222e9f58c723a5081ecfc1f';
-const STORY_CLOUD_NAME = 'dvaku16uu';
-const STORY_CLOUD_PRESET = 'Kimi alok';
-const STORY_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-let _storiesCache = []; // flat list of non-expired story docs, newest first
-let _storiesByUser = {}; // userId -> array of their stories (oldest→newest)
-let _storyViewerQueue = []; // ordered userIds for prev/next in the open viewer
-let _storyViewerUserIdx = 0;
-let _storyViewerItemIdx = 0;
-let _storyAutoTimer = null;
-
-window.storiesUI = {
-    openUploadSheet() {
-        document.getElementById('story-upload-sheet').style.display = 'flex';
-    },
-    closeUploadSheet() {
-        document.getElementById('story-upload-sheet').style.display = 'none';
-        document.getElementById('story-upload-status').textContent = '';
-    },
-
-    async uploadPhoto(evt) {
-        const file = evt.target.files?.[0];
-        if (!file) return;
-        evt.target.value = '';
-        if (file.size > 8 * 1024 * 1024) { alert('Photo must be under 8MB.'); return; }
-        const statusEl = document.getElementById('story-upload-status');
+                        const statusEl = document.getElementById('story-upload-status');
         if (statusEl) statusEl.textContent = 'Uploading photo…';
         try {
             const fd = new FormData();
             fd.append('image', file);
             const res = await fetch(`https://api.imgbb.com/1/upload?key=${STORY_IMGBB_KEY}`, { method:'POST', body: fd });
-            const json = await res.json();
-            if (!json.success) throw new Error(json.error?.message || 'Upload failed');
-            await storiesUI._saveStory('image', json.data.url);
-            if (statusEl) statusEl.textContent = 'Posted ✓';
-            setTimeout(() => storiesUI.closeUploadSheet(), 500);
-        } catch(e) {
-            if (statusEl) statusEl.textContent = 'Failed: ' + e.message;
-        }
-    },
-
-    async uploadVideo(evt) {
-        const file = evt.target.files?.[0];
-        if (!file) return;
-        evt.target.value = '';
-        if (file.size > 50 * 1024 * 1024) { alert('Video must be under 50MB.'); return; }
-        const statusEl = document.getElementById('story-upload-status');
-        if (statusEl) statusEl.textContent = 'Uploading video…';
-        try {
-            const fd = new FormData();
-            fd.append('file', file);
-            fd.append('upload_preset', STORY_CLOUD_PRESET);
-            fd.append('resource_type', 'video');
-            fd.append('folder', 'kolabro_stories');
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${STORY_CLOUD_NAME}/video/upload`, { method:'POST', body: fd });
-            if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error?.message || `Cloudinary error ${res.status}`); }
-            const json = await res.json();
-            await storiesUI._saveStory('video', json.secure_url);
-            if (statusEl) statusEl.textContent = 'Posted ✓';
-            setTimeout(() => storiesUI.closeUploadSheet(), 500);
-        } catch(e) {
-            if (statusEl) statusEl.textContent = 'Failed: ' + e.message;
-        }
-    },
-
-    async _saveStory(type, url) {
-        if (!window._kolaDB || !window._fs) { alert('Still connecting… try again in a moment.'); return; }
-        const { collection, addDoc } = window._fs;
-        const session = getSession();
-        await addDoc(collection(window._kolaDB, 'stories'), {
-            userId: getUserId(),
-            userName: getUserName(),
-            userPhoto: localStorage.getItem('kolaAvatarUrl') || '',
-            type, url,
-            createdAt: new Date().toISOString(),
-            seenBy: []
-        });
-    },
-
-    /* ── Load + render the stories bar (called on home page load) ── */
-    async loadBar() {
-        if (!window._kolaDB || !window._fs) return;
-        const { collection, getDocs, query, orderBy } = window._fs;
-        try {
-            const snap = await getDocs(query(collection(window._kolaDB, 'stories'), orderBy('createdAt', 'desc')));
-            const now = Date.now();
-            _storiesCache = [];
-            snap.forEach(d => {
-                const data = { id: d.id, ...d.data() };
-                if (now - new Date(data.createdAt).getTime() < STORY_TTL_MS) _storiesCache.push(data);
-            });
-            // Group by user, preserving newest-first order of users, oldest→newest within each user
-            _storiesByUser = {};
-            const userOrder = [];
-            _storiesCache.forEach(s => {
-                if (!_storiesByUser[s.userId]) { _storiesByUser[s.userId] = []; userOrder.push(s.userId); }
-                _storiesByUser[s.userId].unshift(s); // reverse to oldest-first within the user's own array
-            });
-            const barList = document.getElementById('stories-bar-list');
-            if (!barList) return;
-            const myId = getUserId();
-            barList.innerHTML = userOrder.map(uid => {
-                const stories = _storiesByUser[uid];
-                const latest = stories[stories.length - 1];
-                const seen = (latest.seenBy || []).includes(myId);
-                return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;cursor:pointer;" onclick="storiesUI.openViewer('${uid}')">
-                    <div style="width:58px;height:58px;border-radius:50%;padding:2px;background:${seen ? 'rgba(255,255,255,0.15)' : 'linear-gradient(135deg,#FFFFFF,#FFFFFF)'};">
-                        <div style="width:100%;height:100%;border-radius:50%;border:2px solid #000000;background-image:url('${latest.userPhoto || ''}');background-size:cover;background-position:center;background-color:#333;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;">
-                            ${latest.userPhoto ? '' : esc((latest.userName||'?').charAt(0).toUpperCase())}
-                        </div>
-                    </div>
-                    <span style="font-size:10px;color:rgba(255,255,255,0.6);max-width:60px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${uid===myId?'You':esc(latest.userName||'Student')}</span>
-                </div>`;
-            }).join('');
-            _storyViewerQueue = userOrder;
-        } catch(e) { console.warn('Stories load failed:', e); }
-    },
+                },
 
     openViewer(userId) {
         _storyViewerUserIdx = _storyViewerQueue.indexOf(userId);
@@ -2368,91 +84,7 @@ window.storiesUI = {
         _storyViewerItemIdx = 0;
         document.getElementById('story-viewer').style.display = 'block';
         document.body.style.overflow = 'hidden';
-        storiesUI._render();
-    },
-
-    closeViewer() {
-        document.getElementById('story-viewer').style.display = 'none';
-        document.body.style.overflow = '';
-        clearTimeout(_storyAutoTimer);
-        document.getElementById('story-viewer-content').innerHTML = '';
-    },
-
-    _render() {
-        clearTimeout(_storyAutoTimer);
-        const uid = _storyViewerQueue[_storyViewerUserIdx];
-        const items = _storiesByUser[uid];
-        if (!items || !items[_storyViewerItemIdx]) { storiesUI.closeViewer(); return; }
-        const item = items[_storyViewerItemIdx];
-
-        // Progress bars
-        const row = document.getElementById('story-progress-row');
-        row.innerHTML = items.map((_, i) => `<div style="flex:1;height:2.5px;border-radius:2px;background:rgba(255,255,255,0.25);overflow:hidden;">
-            <div style="height:100%;background:#fff;width:${i < _storyViewerItemIdx ? '100' : (i === _storyViewerItemIdx ? '0' : '0')}%;${i===_storyViewerItemIdx?'animation:storyFill 5s linear forwards;':''}"></div>
-        </div>`).join('');
-
-        document.getElementById('story-viewer-avatar').style.backgroundImage = item.userPhoto ? `url('${item.userPhoto}')` : '';
-        document.getElementById('story-viewer-name').textContent = item.userName || 'Student';
-        document.getElementById('story-viewer-time').textContent = fmtTime(item.createdAt);
-
-        const content = document.getElementById('story-viewer-content');
-        if (item.type === 'video') {
-            content.innerHTML = `<video src="${item.url}" style="max-width:100%;max-height:100%;" autoplay playsinline onended="storiesUI.next()"></video>`;
-        } else {
-            content.innerHTML = `<img src="${item.url}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
-            _storyAutoTimer = setTimeout(() => storiesUI.next(), 5000);
-        }
-
-        // Mark seen
-        if (window._kolaDB && window._fs && item.id) {
-            const { doc, updateDoc, arrayUnion } = window._fs;
-            const myId = getUserId();
-            if (!(item.seenBy||[]).includes(myId)) {
-                try { updateDoc(doc(window._kolaDB, 'stories', item.id), { seenBy: arrayUnion(myId) }); } catch(e) {}
-            }
-        }
-    },
-
-    next() {
-        const items = _storiesByUser[_storyViewerQueue[_storyViewerUserIdx]];
-        if (_storyViewerItemIdx < items.length - 1) { _storyViewerItemIdx++; storiesUI._render(); }
-        else if (_storyViewerUserIdx < _storyViewerQueue.length - 1) { _storyViewerUserIdx++; _storyViewerItemIdx = 0; storiesUI._render(); }
-        else storiesUI.closeViewer();
-    },
-    prev() {
-        if (_storyViewerItemIdx > 0) { _storyViewerItemIdx--; storiesUI._render(); }
-        else if (_storyViewerUserIdx > 0) { _storyViewerUserIdx--; _storyViewerItemIdx = (_storiesByUser[_storyViewerQueue[_storyViewerUserIdx]].length - 1); storiesUI._render(); }
-    }
-};
-
-// Stories bar is now loaded from kolaChat.open() (see above) since it
-// lives inside the chat screen, not the home page.
-
-function fmtTime(ts) {
-    if (!ts) return '';
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
-    return d.toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit', hour12:true });
-}
-
-function fmtDateLabel(ts) {
-    if (!ts) return 'Today';
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
-    const now = new Date();
-    const diff = Math.floor((now - d) / 86400000);
-    if (diff === 0) return 'Today';
-    if (diff === 1) return 'Yesterday';
-    return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
-}
-
-/* file helpers removed — text-only chat */
-function humanFileSize(bytes){
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
-    return (bytes/1024/1024).toFixed(1) + ' MB';
-}
-
-// Same reason as the getUserId/getSession/esc exposure earlier in this file:
-// these are declared inside this IIFE, so code in the separate <script
+        // these are declared inside this IIFE, so code in the separate <script
 // type="module"> block (gallery, community, doubt-board-era features) can't
 // see them unless explicitly published on window. This was the real cause of
 // "posts not showing" — every post's render threw "fmtTime is not defined".
@@ -2460,188 +92,13 @@ window.fmtTime      = fmtTime;
 window.fmtDateLabel = fmtDateLabel;
 window.humanFileSize = humanFileSize;
 
-/* ════════════════════════════════════
-   RENDER MESSAGE BUBBLE (shared)
-════════════════════════════════════ */
-function renderBubble(data, isAdminView) {
-    const isUser  = data.sender === 'user';
-    const isSent  = isAdminView ? !isUser : isUser;  // "sent" from current viewer's perspective
-    const time    = fmtTime(data.timestamp);
-    const senderLabel = isUser
-        ? (isAdminView ? (data.userName || 'Student') : 'You')
-        : (isAdminView ? 'You (Admin)' : (data.channel === 'khufia' ? 'Khufia Agent' : 'Alok Singh'));
-
-    let attachHtml = '';
-    // Render image(s) if present — supports both the new multi-image "images" array
-    // and the legacy single "imageUrl" field, so old messages still render fine.
-    const imgList = Array.isArray(data.images) && data.images.length ? data.images : (data.imageUrl ? [data.imageUrl] : []);
-    if (imgList.length) {
-        const shown = imgList.slice(0, 4);
-        const extra = imgList.length - shown.length;
-        const gridClass = shown.length === 1 ? 'n1' : shown.length === 2 ? 'n2' : shown.length === 3 ? 'n3' : 'n4plus';
-        const urlsAttr = esc(JSON.stringify(imgList));
-        const uploading = !!data._uploading;
-        const failed = !!data._failed;
-        const itemsHtml = shown.map((u, i) => {
-            const isLastVisible = i === shown.length - 1 && extra > 0;
-            return `<div class="kola-grid-item" ${uploading ? '' : `onclick='kolaChat.openImageViewer(${JSON.stringify(imgList)}, ${i})'`}>
-                <img src="${u}" alt="Image" loading="lazy" onerror="this.style.display='none'">
-                ${isLastVisible ? `<div class="kola-grid-more-overlay">+${extra}</div>` : ''}
-                ${uploading ? `<div class="kola-uploading-overlay"><div class="kola-upload-ring"></div>${data._uploadPct ? `<span class="kola-upload-pct">${data._uploadPct}%</span>` : ''}</div>` : ''}
-            </div>`;
-        }).join('');
-        attachHtml = `<div style="margin-top:${data.text?'8px':'0'};margin-bottom:4px;" data-image-urls='${urlsAttr}'>
-            <div class="kola-img-grid ${gridClass}">${itemsHtml}</div>
-        </div>`;
-    }
-    // Render a generic file attachment (PDF/DOC/PPT/ZIP/etc.) if present
-    if (data.fileUrl) {
-        attachHtml += `<a href="${data.fileUrl}" target="_blank" rel="noopener" download="${esc(data.fileName||'file')}"
-            style="display:flex;align-items:center;gap:10px;margin-top:${data.text?'8px':'0'};margin-bottom:4px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);text-decoration:none;max-width:220px;">
-            <div style="width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i class="fa-solid fa-file-lines" style="color:#FFFFFF;font-size:15px;"></i>
-            </div>
-            <div style="min-width:0;flex:1;">
-                <div style="font-size:12.5px;font-weight:700;color:#FFFFFF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(data.fileName||'File')}</div>
-                <div style="font-size:10px;color:rgba(255,255,255,0.4);font-family:'Orbitron',monospace;">${esc(data.fileSize||'')}</div>
-            </div>
-            <i class="fa-solid fa-download" style="color:rgba(255,255,255,0.35);font-size:12px;flex-shrink:0;"></i>
-        </a>`;
-    }
-    // Render voice message if present
-    if (data.voiceUrl) {
-        const bars = Array.from({length:20}, (_,i) => {
-            const h = 6 + Math.abs(Math.sin(i*0.8 + (data.voiceDuration||1)))*18;
-            return `<div class="kola-voice-bar" style="height:${h}px;"></div>`;
-        }).join('');
-        const dur = data.voiceDuration ? (Math.floor(data.voiceDuration/60)+':'+String(Math.floor(data.voiceDuration%60)).padStart(2,'0')) : '0:00';
-        const uid = 'vp_' + Math.random().toString(36).slice(2,8);
-        attachHtml += `<div class="kola-voice-bubble">
-            <button class="kola-voice-play" onclick="kolaVoice.playMessage('${data.voiceUrl}','${uid}',this)" id="${uid}">
-                <i class="fa-solid fa-play"></i>
-            </button>
-            <div class="kola-voice-waveform">${bars}</div>
-            <span class="kola-voice-dur">${dur}</span>
-        </div>`;
-    }
-
-    const textHtml = data.text ? `<div>${linkifyText(data.text)}</div>` : '';
-    const rawTextAttr = esc((data.text || (data.fileName ? '📎 ' + data.fileName : (imgList.length > 1 ? `📷 ${imgList.length} Photos` : (imgList.length ? '📷 Photo' : (data.voiceUrl ? '🎤 Voice message' : ''))))));
-
-    // "student" | "admin" — which chat surface this bubble is rendered in, used by the
-    // reply / reaction / context-menu helpers below to target the right DOM ids.
-    const ctx = isAdminView ? 'admin' : 'student';
-
-    // Quoted reply block (WhatsApp-style) if this message was sent as a reply to another one.
-    const replyHtml = data.replyTo && data.replyTo.text
-        ? `<div class="kola-reply-quote" onclick="kolaMsgMenu.scrollTo('${esc(data.replyTo.id||'')}')">↩ ${esc(String(data.replyTo.text).slice(0,80))}</div>`
-        : '';
-
-    // Reactions — a small { user: '❤️', admin: '👍' } map, one slot per side of the
-    // conversation, rendered as chips under the bubble and used to drive toggle-on/off.
-    const reactions = data.reactions || {};
-    const reactionEntries = Object.entries(reactions).filter(([,v]) => v);
-    const reactionsHtml = reactionEntries.length
-        ? `<div class="kola-reactions-row">${reactionEntries.map(([who,emoji]) => `<span class="kola-reaction-chip">${emoji}</span>`).join('')}</div>`
-        : '';
-    const reactionsAttr = esc(JSON.stringify(reactions));
-
-    return `
-    <div class="kola-msg-row-chat ${isSent ? 'sent' : 'recv'}" data-msg-id="${esc(data.id||'')}">
-        ${!isSent ? `<div class="kola-recv-avatar" title="${esc(senderLabel)}">
-            ${isAdminView
-                ? `<span style="font-size:12px;font-weight:900;">${(data.userName||'S').charAt(0).toUpperCase()}</span>`
-                : (data.channel === 'khufia'
-                    ? `<img src="https://drive.google.com/thumbnail?id=1epBoCVzqK_tRuwFcp_SweJQ98W_WDbvM&sz=w200" onerror="this.style.display='none';this.parentNode.textContent='🕵️'">`
+/* ═══                    ? `<img src="https://drive.google.com/thumbnail?id=1epBoCVzqK_tRuwFcp_SweJQ98W_WDbvM&sz=w200" onerror="this.style.display='none';this.parentNode.textContent='🕵️'">`
                     : `<img src="https://drive.google.com/thumbnail?id=1X_k6gMNuOkHk-GM5o8LDzIdNJUPEIM26&sz=w200" onerror="this.style.display='none';this.parentNode.textContent='A'">`)
             }
         </div>` : ''}
         <div class="kola-bubble-chat ${isSent ? 'sent' : 'recv'}" style="position:relative;"
             data-can-delete="${isSent ? '1' : '0'}" data-text="${rawTextAttr}" data-reactions="${reactionsAttr}"
-            onmousedown="kolaMsgMenu.pressStart(event,'${esc(data.id||'')}','${ctx}')" onmouseup="kolaMsgMenu.pressEnd()" onmouseleave="kolaMsgMenu.pressEnd()"
-            ontouchstart="kolaMsgMenu.pressStart(event,'${esc(data.id||'')}','${ctx}')" ontouchend="kolaMsgMenu.pressEnd()"
-            onclick="kolaSelect.tapBubble('${esc(data.id||'')}')"
-            ondblclick="kolaReact.quick('${esc(data.id||'')}','${ctx}')"
-            oncontextmenu="event.preventDefault(); kolaMsgMenu.open('${esc(data.id||'')}','${ctx}',event.clientX,event.clientY);">
-            ${!isSent ? `<div class="kola-bubble-sender">${esc(senderLabel)}</div>` : ''}
-            ${replyHtml}
-            ${textHtml}
-            ${attachHtml}
-            <div class="kola-bubble-time">
-                <span>${time}</span>
-                ${isSent ? `<span class="kola-read-tick">${data.read ? '✓✓' : '✓'}</span>` : ''}
-            </div>
-            ${reactionsHtml}
-        </div>
-    </div>`;
-}
-
-/* ════════════════════════════════════════════════════════
-   WhatsApp-style message selection: long-press to enter select
-   mode, tap more messages to add to selection, act on all of
-   them via the toolbar (reply / star / delete / copy / forward).
-════════════════════════════════════════════════════════ */
-let _kolaPressTimer = null;
-let _kolaSelectMode = false;
-const _kolaSelectedIds = new Set();
-
-window.kolaSelect = {
-    pressStart(msgId) {
-        _kolaPressTimer = setTimeout(() => this._enter(msgId), 450);
-    },
-    pressEnd() {
-        clearTimeout(_kolaPressTimer);
-    },
-    tapBubble(msgId) {
-        if (!_kolaSelectMode) return; // normal tap does nothing when not selecting
-        this._toggle(msgId);
-    },
-    _enter(msgId) {
-        _kolaSelectMode = true;
-        document.getElementById('kola-select-bar').style.display = 'flex';
-        document.getElementById('kola-chat-topbar').style.display = 'none';
-        this._toggle(msgId);
-    },
-    _toggle(msgId) {
-        const el = document.querySelector(`[data-msg-id="${msgId}"] .kola-bubble-chat`);
-        if (_kolaSelectedIds.has(msgId)) {
-            _kolaSelectedIds.delete(msgId);
-            if (el) el.classList.remove('kola-selected');
-        } else {
-            _kolaSelectedIds.add(msgId);
-            if (el) el.classList.add('kola-selected');
-        }
-        if (_kolaSelectedIds.size === 0) { this.exit(); return; }
-        document.getElementById('kola-select-count').textContent = _kolaSelectedIds.size;
-    },
-    exit() {
-        _kolaSelectMode = false;
-        document.querySelectorAll('.kola-bubble-chat.kola-selected').forEach(el => el.classList.remove('kola-selected'));
-        _kolaSelectedIds.clear();
-        document.getElementById('kola-select-bar').style.display = 'none';
-        document.getElementById('kola-chat-topbar').style.display = 'flex';
-    },
-    _selectedTexts() {
-        return [...document.querySelectorAll('.kola-bubble-chat.kola-selected')].map(el => el.dataset.text || '');
-    },
-    reply() {
-        if (_kolaSelectedIds.size !== 1) { alert('Select only one message to reply to.'); return; }
-        const text = this._selectedTexts()[0];
-        const input = document.getElementById('kola-chat-input');
-        if (input) { input.value = `↪ "${text.slice(0,60)}" — `; input.focus(); }
-        this.exit();
-    },
-    star() {
-        alert('⭐ Starred ' + _kolaSelectedIds.size + ' message(s).');
-        this.exit();
-    },
-    async deleteSelected() {
-        const ids = [..._kolaSelectedIds];
-        const undeletable = ids.filter(id => {
-            const el = document.querySelector(`[data-msg-id="${id}"] .kola-bubble-chat`);
-            return el && el.dataset.canDelete !== '1';
-        });
-        if (undeletable.length) { alert('You can only delete messages you sent.'); return; }
+                    if (undeletable.length) { alert('You can only delete messages you sent.'); return; }
         if (!confirm(`Delete ${ids.length} message(s)?`)) return;
         try {
             const { doc, deleteDoc } = window._fs;
@@ -4365,35 +1822,683 @@ Object.defineProperty(window, '_kolaChatChannelRef', {
    BACKWARD COMPAT SHIMS
 ════════════════════════════════════ */
 // Old openDevChat / closeDevChat calls still work
-window.openDevChat  = () => kolaChat.open();
-window.closeDevChat = () => kolaChat.close();
-window.sendDevMsg   = () => kolaChat.send();
+window. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coding Express Lab</title>
+  
+  <!-- Monaco Editor (VS Code Engine) CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-// Old openAdminUserChat (used by PDF analytics page)
-window.openAdminUserChat = (userId, userName, userEmail) => {
-    adminChat.open(userId, userName, userEmail);
-};
+  <style>
+    /* CSS Variables for Themes */
+    :root {
+      /* Dark Mode (Default) */
+      --bg-main: #1e1e1e;
+      --bg-secondary: #252526;
+      --bg-tertiary: #333333;
+      --text-main: #cccccc;
+      --text-active: #ffffff;
+      --border-color: #3e3e42;
+      --accent: #007acc;
+      --accent-hover: #0098ff;
+      --console-bg: #181818;
+    }
 
-// Old sendDevReply used by PDF analytics page
-window.sendDevReply = async function(userId, text) {
-    const { collection, addDoc } = window._fs;
-    const db = window._kolaDB;
-    await addDoc(collection(db, 'supportChats'), {
-        userId, userName: 'Alok Singh', userEmail: userId,
-        sender: 'admin', channel: 'developer', text: text.trim(),
-        timestamp: new Date().toISOString(),
-        read: false
+    body.light-mode {
+      --bg-main: #ffffff;
+      --bg-secondary: #f3f3f3;
+      --bg-tertiary: #e1e1e1;
+      --text-main: #333333;
+      --text-active: #000000;
+      --border-color: #cccccc;
+      --accent: #007acc;
+      --accent-hover: #005999;
+      --console-bg: #f9f9f9;
+    }
+
+    body.medium-mode {
+      --bg-main: #2d2d2d;
+      --bg-secondary: #3c3c3c;
+      --bg-tertiary: #505050;
+      --text-main: #e0e0e0;
+      --text-active: #ffffff;
+      --border-color: #555555;
+      --accent: #007acc;
+      --accent-hover: #0098ff;
+      --console-bg: #242424;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body, html {
+      height: 100%;
+      width: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      overflow: hidden;
+    }
+
+    /* Landing Screen */
+    #landing-screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, var(--bg-main), var(--bg-secondary));
+      z-index: 100;
+    }
+
+    #landing-screen h1 {
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+      color: var(--text-active);
+    }
+
+    .btn-launch {
+      padding: 1.2rem 3rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 122, 204, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .btn-launch:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 122, 204, 0.6);
+    }
+
+    /* Modal for Language Picker */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 200;
+    }
+
+    .modal-content {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 2rem;
+      border-radius: 12px;
+      width: 320px;
+      text-align: center;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 1.5rem;
+      color: var(--text-active);
+    }
+
+    .lang-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .lang-btn {
+      padding: 0.8rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      color: var(--text-active);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+
+    .lang-btn:hover {
+      background: var(--accent);
+    }
+
+    /* Workspace App Area */
+    #workspace {
+      display: none;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      height: 40px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+    }
+
+    .brand {
+      font-weight: bold;
+      color: var(--text-active);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .icon-btn:hover {
+      color: var(--text-active);
+      background: var(--bg-tertiary);
+    }
+
+    /* Settings Dropdown */
+    .settings-dropdown {
+      position: relative;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.5rem 0;
+      width: 180px;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 300;
+    }
+
+    .dropdown-menu.show {
+      display: block;
+    }
+
+    .dropdown-item {
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      color: var(--text-main);
+      font-size: 0.9rem;
+    }
+
+    .dropdown-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-active);
+    }
+
+    /* Main Container Layout */
+    .main-body {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 40px);
+      overflow: hidden;
+    }
+
+    /* Left Sidebar */
+    .sidebar {
+      width: 200px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-title {
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .file-tree {
+      list-style: none;
+      padding: 0.5rem 0;
+    }
+
+    .file-item {
+      padding: 0.4rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .file-item.active {
+      background: var(--bg-tertiary);
+      color: var(--text-active);
+    }
+
+    /* Center/Split Container */
+    .split-container {
+      display: flex;
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Editor Section (60%) */
+    .editor-section {
+      width: 60%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border-color);
+      position: relative;
+      background: var(--bg-main);
+    }
+
+    .section-header {
+      height: 35px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 0.8rem;
+      font-size: 0.85rem;
+    }
+
+    #monaco-editor-container {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Output Section (40%) */
+    .output-section {
+      width: 40%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: #ffffff;
+    }
+
+    #live-preview {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #ffffff;
+    }
+
+    /* Console Panel (Hidden by Default, Toggled via Setting) */
+    .console-panel {
+      height: 150px;
+      background: var(--console-bg);
+      border-top: 1px solid var(--border-color);
+      display: none;
+      flex-direction: column;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    .console-header {
+      padding: 4px 8px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-main);
+    }
+
+    .console-logs {
+      flex: 1;
+      padding: 8px;
+      overflow-y: auto;
+      color: var(--text-main);
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+      white-space: pre-wrap;
+    }
+    .log-entry.error { color: #f48771; }
+    .log-entry.info { color: #75beff; }
+
+    /* Fullscreen Utility Classes */
+    .full-screen-mode {
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 500 !important;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body class="dark-mode">
+
+  <!-- Landing Screen -->
+  <div id="landing-screen">
+    <h1>Coding Express</h1>
+    <button class="btn-launch" onclick="openLangPicker()">Launch Lab</button>
+  </div>
+
+  <!-- Language Selection Modal -->
+  <div id="lang-modal" class="modal-overlay">
+    <div class="modal-content">
+      <h2>Select Language</h2>
+      <div class="lang-options">
+        <button class="lang-btn" onclick="startWorkspace('html')">HTML</button>
+        <button class="lang-btn" onclick="startWorkspace('css')">CSS</button>
+        <button class="lang-btn" onclick="startWorkspace('js')">JavaScript</button>
+        <button class="lang-btn" onclick="startWorkspace('combo')">HTML, CSS & JS Combo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Workspace -->
+  <div id="workspace">
+    <header>
+      <div class="brand">
+        <i class="fa-solid fa-code"></i>
+        <span>Coding Express Lab</span>
+      </div>
+      <div class="header-actions">
+        <div class="settings-dropdown">
+          <button class="icon-btn" onclick="toggleSettingsMenu()" title="Settings">
+            <i class="fa-solid fa-gear"></i>
+          </button>
+          <div id="settings-menu" class="dropdown-menu">
+            <div class="dropdown-item" onclick="setTheme('dark')">
+              <span>Dark Mode</span>
+              <i id="check-dark" class="fa-solid fa-check"></i>
+            </div>
+            <div class="dropdown-item" onclick="setTheme('light')">
+              <span>Light Mode</span>
+              <i id="check-light" class="fa-solid fa-check hidden"></i>
+            </div>
+            <div class="dropdown-item" onclick="setTheme('medium')">
+              <span>Medium Mode</span>
+              <i id="check-medium" class="fa-solid fa-check hidden"></i>
+            </div>
+            <hr style="border-color: var(--border-color); margin: 4px 0;">
+            <div class="dropdown-item" onclick="toggleConsole()">
+              <span>Toggle Console</span>
+              <i class="fa-solid fa-terminal"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-body">
+      <!-- File Sidebar -->
+      <div class="sidebar">
+        <div class="sidebar-title">Explorer</div>
+        <ul id="file-list" class="file-tree">
+          <!-- Populated dynamically based on language choice -->
+        </ul>
+      </div>
+
+      <!-- Split Area (60% Code Editor / 40% Output Area) -->
+      <div class="split-container">
+        <!-- Editor Section -->
+        <div id="editor-section" class="editor-section">
+          <div class="section-header">
+            <span id="current-filename">index.html</span>
+            <button class="icon-btn" onclick="toggleFullscreenEditor()" title="Full Screen Editor">
+              <i class="fa-solid fa-expand"></i>
+            </button>
+          </div>
+          <div id="monaco-editor-container"></div>
+        </div>
+
+        <!-- Live Output Section -->
+        <div id="output-section" class="output-section">
+          <div class="section-header" style="background: var(--bg-secondary); color: var(--text-main);">
+            <span>Live Output</span>
+            <button class="icon-btn" onclick="toggleFullscreenViewer()" title="Full Screen Preview">
+              <i class="fa-solid fa-expand"></i>
+            </button>
+          </div>
+          <iframe id="live-preview" sandbox="allow-scripts"></iframe>
+
+          <!-- Console Panel (Below Output) -->
+          <div id="console-panel" class="console-panel">
+            <div class="console-header">
+              <span>Console</span>
+              <button class="icon-btn" onclick="clearConsole()"><i class="fa-solid fa-trash"></i></button>
+            </div>
+            <div id="console-logs" class="console-logs"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State management
+    let editor = null;
+    let currentTheme = 'dark';
+    let activeFile = 'index.html';
+    let files = {
+      'index.html': { name: 'index.html', lang: 'html', content: '<h1>Hello World</h1>\n<button onclick="sayHello()">Click Me</button>' },
+      'styles.css': { name: 'styles.css', lang: 'css', content: 'body {\n  font-family: sans-serif;\n  padding: 20px;\n}\nh1 {\n  color: #007acc;\n}' },
+      'script.js': { name: 'script.js', lang: 'javascript', content: 'function sayHello() {\n  console.log("Hello from Coding Express Console!");\n  alert("Hello World!");\n}' }
+    };
+
+    // Initialize Monaco Editor
+    require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.39.0/min/vs' } });
+
+    function initMonaco() {
+      require(['vs/editor/editor.main'], function () {
+        editor = monaco.editor.create(document.getElementById('monaco-editor-container'), {
+          value: files[activeFile].content,
+          language: files[activeFile].lang,
+          theme: 'vs-dark',
+          automaticLayout: true,
+          suggestOnTriggerCharacters: true,
+          quickSuggestions: true
+        });
+
+        // Update preview on code change
+        editor.onDidChangeModelContent(() => {
+          files[activeFile].content = editor.getValue();
+          updateLivePreview();
+        });
+      });
+    }
+
+    // Modal & Workspace Actions
+    function openLangPicker() {
+      document.getElementById('lang-modal').style.display = 'flex';
+    }
+
+    function startWorkspace(mode) {
+      document.getElementById('lang-modal').style.display = 'none';
+      document.getElementById('landing-screen').style.display = 'none';
+      document.getElementById('workspace').style.display = 'flex';
+
+      setupFileSidebar(mode);
+      initMonaco();
+      setTimeout(updateLivePreview, 500);
+    }
+
+    function setupFileSidebar(mode) {
+      const fileList = document.getElementById('file-list');
+      fileList.innerHTML = '';
+
+      let availableFiles = [];
+      if (mode === 'html') availableFiles = ['index.html'];
+      else if (mode === 'css') availableFiles = ['styles.css'];
+      else if (mode === 'js') availableFiles = ['script.js'];
+      else availableFiles = ['index.html', 'styles.css', 'script.js'];
+
+      availableFiles.forEach((fileKey) => {
+        const li = document.createElement('li');
+        li.className = `file-item ${fileKey === activeFile ? 'active' : ''}`;
+        li.innerHTML = `<i class="fa-regular fa-file-code"></i> ${fileKey}`;
+        li.onclick = () => switchFile(fileKey, li);
+        fileList.appendChild(li);
+      });
+
+      if (!availableFiles.includes(activeFile)) {
+        activeFile = availableFiles[0];
+      }
+      document.getElementById('current-filename').innerText = activeFile;
+    }
+
+    function switchFile(fileKey, element) {
+      if (!editor) return;
+      document.querySelectorAll('.file-item').forEach(el => el.classList.remove('active'));
+      element.classList.add('active');
+
+      activeFile = fileKey;
+      document.getElementById('current-filename').innerText = fileKey;
+
+      const model = monaco.editor.createModel(files[fileKey].content, files[fileKey].lang);
+      editor.setModel(model);
+    }
+
+    // Live Output Rendering with Console Override Interceptor
+    function updateLivePreview() {
+      const iframe = document.getElementById('live-preview');
+      const html = files['index.html'] ? files['index.html'].content : '';
+      const css = files['styles.css'] ? `<style>${files['styles.css'].content}</style>` : '';
+      
+      // Inject script to mirror console outputs inside the Lab console
+      const consoleOverride = `
+        <script>
+          (function() {
+            const sendLog = (type, args) => {
+              window.parent.postMessage({ type: 'CONSOLE_LOG', logType: type, msg: Array.from(args).join(' ') }, '*');
+            };
+            console.log = (...args) => sendLog('info', args);
+            console.error = (...args) => sendLog('error', args);
+          })();
+        <\/script>
+      `;
+
+      const js = files['script.js'] ? `<script>${files['script.js'].content}<\/script>` : '';
+
+      const combinedSource = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            ${css}
+            ${consoleOverride}
+          </head>
+          <body>
+            ${html}
+            ${js}
+          </body>
+        </html>
+      `;
+
+      iframe.srcdoc = combinedSource;
+    }
+
+    // Console Event Listener
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'CONSOLE_LOG') {
+        const consoleLogs = document.getElementById('console-logs');
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${event.data.logType}`;
+        entry.innerText = `> ${event.data.msg}`;
+        consoleLogs.appendChild(entry);
+        consoleLogs.scrollTop = consoleLogs.scrollHeight;
+      }
     });
-};
 
-/* ── Boot ── */
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(checkUnreadBadge, 1500);
-});
+    function clearConsole() {
+      document.getElementById('console-logs').innerHTML = '';
+    }
 
-})();
-</script>
+    // Settings Menu & Themes
+    function toggleSettingsMenu() {
+      const menu = document.getElementById('settings-menu');
+      menu.classList.toggle('show');
+    }
 
+    function setTheme(theme) {
+      currentTheme = theme;
+      document.body.className = `${theme}-mode`;
 
+      document.getElementById('check-dark').classList.toggle('hidden', theme !== 'dark');
+      document.getElementById('check-light').classList.toggle('hidden', theme !== 'light');
+      document.getElementById('check-medium').classList.toggle('hidden', theme !== 'medium');
+
+      if (editor) {
+        monaco.editor.setTheme(theme === 'light' ? 'vs' : 'vs-dark');
+      }
+
+      toggleSettingsMenu();
+    }
+
+    function toggleConsole() {
+      const consolePanel = document.getElementById('console-panel');
+      if (consolePanel.style.display === 'flex') {
+        consolePanel.style.display = 'none';
+      } else {
+        consolePanel.style.display = 'flex';
+      }
+      toggleSettingsMenu();
+    }
+
+    // Fullscreen Toggles
+    function toggleFullscreenEditor() {
+      const editorSection = document.getElementById('editor-section');
+      editorSection.classList.toggle('full-screen-mode');
+      if (editor) editor.layout();
+    }
+
+    function toggleFullscreenViewer() {
+      const outputSection = document.getElementById('output-section');
+      outputSection.classList.toggle('full-screen-mode');
+    }
+
+    // Close dropdown on outside click
+    window.onclick = function(event) {
+      if (!event.target.matches('.icon-btn') && !event.target.matches('.fa-gear')) {
+        const menu = document.getElementById('settings-menu');
+        if (menu && menu.classList.contains('show')) {
+          menu.classList.remove('show');
+        }
+      }
+    };
+  </script>
 </body>
 </html>
+
